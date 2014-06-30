@@ -1,0 +1,75 @@
+\name{moments-methods}
+\docType{methods}
+\alias{moments-methods}
+\alias{moments,adpcr-method}
+\alias{moments,ddpcr-method}
+\alias{moments,numeric-method}
+\alias{moments}
+\title{
+Calculate Moments of Poisson Distribution
+}
+\description{
+The function allows user to quickly calculate moments of a Poisson distributions. The calculations
+are based on values of positive and total partitions or the theoretical lambda value.
+}
+\usage{
+\S4method{moments}{adpcr}(input)
+\S4method{moments}{ddpcr}(input)
+\S4method{moments}{numeric}(input)
+}
+\arguments{
+  \item{input}{
+a single numeric object (lambda) or a two element vector (first element is treated as the number
+of positive partitions and the second as the number of total partitions) or an object of class
+\code{\linkS4class{adpcr}} or \code{\linkS4class{ddpcr}}.
+}
+}
+\value{
+A named vector of four elements (mean, variance, skewness and kurtosis). 
+
+In case of \code{\linkS4class{adpcr}} or \code{\linkS4class{ddpcr}} object containing total number of
+positive molecules, a n-by-4 matrix, where n is the number of experiments. 
+
+In case of \code{\linkS4class{adpcr}} or \code{\linkS4class{ddpcr}} containing number of molecules
+per partition, a n*2-by-4 matrix, where n is the number of experiments. In this case empirical
+moments are calculated directly from a distribution of the data. Theoretical moments from a 
+Poisson distribution with \eqn{\lambda}{lambda} parameter taken from the data.
+}
+
+\author{
+Michal Burdukiewicz.
+}
+
+\note{
+Four first moments of a Poisson distribution.
+
+Mean : \eqn{\lambda}{lambda}.
+
+Variance: \eqn{\lambda}{lambda}.
+
+Skewness: \eqn{\sqrt{\lambda}}{lambda^(-0.5)}.
+
+Kurtosis: \eqn{\frac{1}{\lambda}}{lambda^(-1)}.
+}
+
+\examples{
+# moments for lambda = 2
+moments(2)
+
+# moments for 100 positive partitions of 765 total partitions
+moments(c(100, 765))
+
+# calculate moments for an array digital PCR, total number of positive partitions 
+ddpcr1 <- sim_ddpcr(m = 10, n = 40, times = 50, pos_sums = TRUE, n_exp = 5)
+moments(ddpcr1)
+
+# calculate moments for an array digital PCR, detailed number of molecules in each partition 
+ddpcr2 <- sim_ddpcr(m = 10, n = 40, times = 50, pos_sums = FALSE, n_exp = 5)
+moments(ddpcr2)
+}
+
+\keyword{ moments }
+\keyword{ mean }
+\keyword{ variance }
+\keyword{ skewness }
+\keyword{ kurtosis }
