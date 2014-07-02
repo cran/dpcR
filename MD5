@@ -1,5 +1,5 @@
 bb17e06b0a35930109a00e4e2c3194a6 *CHANGELOG
-50df7d6c381f715d15c1d05190aa427c *DESCRIPTION
+5b12d4253bf3058eca81a1e95b6be110 *DESCRIPTION
 faf0288a02094abd07d8a8e251da8b0c *NAMESPACE
 438d469fd5d0fad6a8d0b601ea5aa0d7 *R/adpcr.R
 d23de39b7b44d328e1b9452dc771cb74 *R/bioamp.R
@@ -41,4 +41,4 @@ ff8401a40849263d05517ff7e28da116 *man/show-methods.Rd
 940942b7188e2f34952f5d4222f2f0f9 *man/summary-methods.Rd
 fdfb0d02e6d8271f2df52f9deb8407fc *man/test_panel.Rd
 bcec4109cb792acf921954d40bf56376 *man/test_peaks-methods.Rd
-4779ce21fad064cc79d72fefcf8a675d *man/test_ratio.Rd
+e01a09a250259eda90aef7670a124281 *man/test_ratio.Rd
