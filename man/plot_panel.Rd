@@ -20,15 +20,16 @@ plot_panel(input, nx_a, ny_a, col = "red", legend = TRUE, half = "none",
 \item{half}{If \code{left} or \code{right}, every well is represented only
 by the adequate half of the rectangle.}
 
-\item{use_breaks}{if \code{TRUE}, input is cut into intervals using
+\item{use_breaks}{if \code{TRUE}, input is cutted into intervals using
 \code{breaks} slot. If \code{FALSE}, input is converted to factor using
-\code{\link[base]{as.factor}}.}
+\code{\link[base]{as.factor}}. Ignored if data has \code{"tp"} type (see
+possible types of \code{\linkS4class{adpcr}} objects).}
 
 \item{...}{Arguments to be passed to \code{plot} function.}
 }
 \value{
-A list of coordinates of each microfluidic well and an assigned
-color.
+Invisibly returns a list of coordinates of each microfluidic well
+and an assigned color.
 }
 \description{
 The \code{plot_panel} function takes objects of the class
@@ -38,7 +39,7 @@ of a chamber-based digital PCR experiments (e.g., Digital Array (R) IFCs
 }
 \details{
 Currently only objects containing just one column of data (one panel) can be
-plotted (see Examples how easily plot multipanel objects). Moreover, the
+plotted (see Examples how easily plot multipanel objects). Moreover the
 object must contain fluorescence intensities or exact number of molecules or
 the positive hits derived from the Cq values for each well. The Cq values
 can be obtained by custom made functions (see example in

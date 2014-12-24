@@ -6,11 +6,12 @@
 
 # dpcR package
 
-dpcR is an R package designed to assist in analysis of digital PCR experiments.
+dpcR is an R package designed to perform an analysis of digital PCR experiments.
 
 ## Read data
 
-dpcR does not have any inbuilt tools for reading specific data types. Instead, we advise to use other packages belonging do the pcRuniversum as [RDML](http://cran.r-project.org/web/packages/RDML/index.html) or dedicated packages such as ReadqPCR (available from bioconductor.org).
+dpcR does not have built-in tools for reading specific data types. Instead, we advise to use other packages belonging do the pcRuniversum such as [RDML](http://cran.r-project.org/web/packages/RDML/index.html) or dedicated packages such as ReadqPCR ([available from bioconductor.org](http://www.bioconductor.org/packages/release/bioc/html/ReadqPCR.html)). Further information can be found in Pabinger et al. 2014 (A survey of tools for the analysis of quantitative PCR (qPCR) data. Biomolecular Detection and Quantification 1, 23--33. doi:10.1016/j.bdq.2014.08.002).
+
 
 Before analysis data should be saved using one of the three classes - `adpcr` (end-point array digital PCR experiments), `ddpcr` (droplet digital PCR experiments) and `rtadpcr` (real-time array digital PCR experiments). To do so, use `create_dpcr` function.
 
@@ -21,11 +22,11 @@ sample_runs <- matrix(rpois(480, lambda = 1.5), ncol = 2)
 #check its class - it's a typical R structure
 class(sample_runs)
 #save it to adpcr object
-adpcr_experiments <- create_dpcr(sample_runs, n = 30L, type = "nm", adpcr = TRUE)
+adpcr_experiments <- create_dpcr(sample_runs, n = 240L, type = "nm", adpcr = TRUE)
 class(adpcr_experiments)
 ```
 
-## Data visualisation and tests
+## Data visualisation
 
 Data can be easily visualized using `plot_panel` function.
 
@@ -34,8 +35,48 @@ Data can be easily visualized using `plot_panel` function.
 plot_panel(extract_dpcr(adpcr_experiments, 1), nx_a = 15, ny_a = 16, main = "Experiment 1")
 ```
 
-Randomness of spatial distribution on plate can be checked using `test_panel`.
+The same data can be visualized easily in binarized form (positive/negative partitions).
 ```{r eval=TRUE}
 #remember, you can plot only single panel at once 
-test_panel(extract_dpcr(adpcr_experiments, 1), nx_a = 15, ny_a = 16)
+plot_panel(binarize(extract_dpcr(adpcr_experiments, 1)), nx_a = 15, ny_a = 16, main = "Experiment 1")
 ```
+
+
+## Comparison of the experiments
+
+Generalized Linear Models (GLM) are linear models for data, where the response variables may have non-normal distributions (as for example binomially distributed positive partitions in digital PCR experiments). Using GLM we can describe relationships between results of digital PCR:
+
+$$\log{Y} = \beta^T X$$
+    
+where $Y$ are counts, $X$ are experiments names (categorical data) and $\beta$ are linear model coefficients for every experiment. Moreover, $\exp{\beta} = \lambda$.
+    
+Estimated means copies per partitions obtained from the model are compared each other using multiple t-test.
+
+```{r eval=TRUE}
+#comparison of the experiments using GLM
+
+#1. Simulate results of three different experiments with two repetitions each
+#experiment 2 differs significantly from others
+adpcr1 <- sim_adpcr(m = 20, n = 765, times = 1e5, pos_sums = FALSE, n_panels = 2)
+adpcr2 <- sim_adpcr(m = 100, n = 765, times = 1e5, pos_sums = FALSE, n_panels = 2)
+adpcr3 <- sim_adpcr(m = 20, n = 765, times = 1e5, pos_sums = FALSE, n_panels = 2)
+
+#2. Join results for convenience
+adpcrs <- bind_dpcr(adpcr1, adpcr2, adpcr3)
+
+#3. Perform test.
+comp <- test_counts(adpcrs)
+
+#4. See summary of the test
+summary(comp)
+
+#5. Plot results of the test 
+plot(comp, aggregate = FALSE)
+plot(comp, aggregate = TRUE)
+
+#extract coefficients for the further usage
+coef(comp)
+```
+
+The Poisson regression on binary data (positive/negative partition) can be used only when the concentration of template molecules in samples is small (positive partitions contain very rarely more than 1 template particle). Higher concentrations requires binomial regression.
+    

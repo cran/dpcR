@@ -25,10 +25,11 @@
 #' by the adequate half of the rectangle.
 #' @param use_breaks if \code{TRUE}, input is cutted into intervals using 
 #' \code{breaks} slot. If \code{FALSE}, input is converted to factor using
-#' \code{\link[base]{as.factor}}.
+#' \code{\link[base]{as.factor}}. Ignored if data has \code{"tp"} type (see 
+#' possible types of \code{\linkS4class{adpcr}} objects).
 #' @param ... Arguments to be passed to \code{plot} function.
-#' @return A list of coordinates of each microfluidic well and an assigned
-#' color.
+#' @return Invisibly returns a list of coordinates of each microfluidic well 
+#' and an assigned color.
 #' @author Michal Burdukiewicz, Stefan Roediger.
 #' @seealso \code{\link{extract_dpcr}}.
 #' @keywords hplot
@@ -89,8 +90,8 @@
 plot_panel <- function(input, nx_a, ny_a, col = "red", legend = TRUE, 
                        half = "none", use_breaks = TRUE, ...) {  
   if (class(input) == "adpcr") {
-    if (!(slot(input, "type") %in% c("nm", "tp", "ct")))
-      stop("Input must contain data of type 'nm', 'tp' or 'ct'.", 
+    if (!(slot(input, "type") %in% c("nm", "np", "ct")))
+      stop("Input must contain data of type 'nm', 'np' or 'ct'.", 
            call. = TRUE, domain = NA) 
     if (ncol(input) > 1)
       stop("Input must contain only one panel.", call. = TRUE, domain = NA)    
@@ -100,11 +101,13 @@ plot_panel <- function(input, nx_a, ny_a, col = "red", legend = TRUE,
   } else {
     stop("Input must have the 'adpcr' class", call. = TRUE, domain = NA)
   }
-  if (length(input) != nx_a * ny_a)
+  if (slot(input, "n") != nx_a * ny_a)
     stop (paste0("Can not process with plot since the input 
-                 legnth (", length(input) ,
-                 ") differs from the size of nx_a * ny_a (", nx_a * ny_a, ").
-                 \n Change nx_a * ny_a to have the same number of elements."))
+                 length (", slot(input, "n"),
+                 ") differs from the size of nx_a * ny_a (", nx_a * ny_a, ")."))
+  
+  if (slot(input, "type") == "np")
+    use_breaks = FALSE
   
   # Use breaks points to split input 
   if(use_breaks) {
@@ -134,8 +137,7 @@ plot_panel <- function(input, nx_a, ny_a, col = "red", legend = TRUE,
   } else {
     if (length(col) != ncols) {
       stop("The vector of colors must have length equal to the number of levels of 
-           the input.", 
-           call. = TRUE, domain = NA)    
+           the input.")    
     }
     levels(cols) <- col
   }

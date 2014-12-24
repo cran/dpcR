@@ -4,28 +4,74 @@
 #' 
 #' @aliases test_counts
 #' @param input adpcr or dpcr object with with "nm" type.
+#' @param binomial \code{logical}, if \code{TRUE} binomial regression 
+#' is performed. If \code{FALSE}, Poisson regression is used instead.
 #' @param ... additional arguments for \code{\link{glm}} function.
-#' @details \code{test_counts} fits General Linear Model (using Poisson 
-#' \code{\link[stats]{family}}) to the counts data from different digital PCR experiments.
-#' Comparisions between single experiments utilize Tukey's contrast and multiple 
-#' t-tests using function \code{\link{glht}}.
-#' @note Mean values of Poisson distribution are derived from General Linear Models. They values
-#' will vary depending on input.
+#' @details \code{test_counts} fits counts data from different 
+#' digital PCR experiments to Generalized Linear Model (using quasibinomial
+#' or quasipoisson \code{\link[stats]{family}}). Comparisions between single experiments
+#' utilize Tukey's contrast and multiple t-tests (as provided by function \code{\link{glht}}).
+#' @note Mean number of template molecules per partitions and its confidence intervals are derived 
+#' from General Linear Models. Their values will vary depending on input.
 #' @export
-#' @return an object of class
-#' @author Michal Burdukiewicz, Stefan Roediger
+#' @seealso
+#' Functions used by \code{test_counts}: 
+#' \itemize{
+#' \item \code{\link[stats]{glm}},
+#' \item \code{\link[multcomp]{glht}},
+#' \item \code{\link[multcomp]{cld}}
+#' }
+#' 
+#' GUI presenting capabilities of the test: \code{\link{test_counts_gui}}.
+#' 
+#' @return an object of class \code{\linkS4class{count_test}}.
+#' @author Michal Burdukiewicz, Stefan Roediger.
+#' @references Bretz F, Hothorn T, Westfall P, \emph{Multiple comparisons using R}. 
+#' Boca Raton, Florida, USA: Chapman & Hall/CRC Press (2010).
 #' @examples
 #' adpcr1 <- sim_adpcr(m = 10, n = 765, times = 1000, pos_sums = FALSE, n_panels = 3)
 #' adpcr2 <- sim_adpcr(m = 60, n = 550, times = 1000, pos_sums = FALSE, n_panels = 3)
 #' adpcr3 <- sim_adpcr(m = 10, n = 600, times = 1000, pos_sums = FALSE, n_panels = 3)
-#' two_groups <- test_counts(bind_dpcr(adpcr1, adpcr2))
-#' summary(two_groups)
-#' plot(two_groups)
+#' 
+#' #compare experiments using binomial regression
+#' two_groups_bin <- test_counts(bind_dpcr(adpcr1, adpcr2), binomial = TRUE)
+#' summary(two_groups_bin)
+#' plot(two_groups_bin)
+#' #plot aggregated results
+#' plot(two_groups_bin, aggregate = TRUE)
+#' #get coefficients
+#' coef(two_groups_bin)
+#' 
+#' #this time use Poisson regression
+#' two_groups_pois <- test_counts(bind_dpcr(adpcr1, adpcr2), binomial = FALSE)
+#' summary(two_groups_pois)
+#' plot(two_groups_pois)
+#' 
+#' #see how test behaves when results aren't significantly different
 #' one_group <- test_counts(bind_dpcr(adpcr1, adpcr3))
 #' summary(one_group)
 #' plot(one_group)
 
-test_counts <- function(input, ...) { 
+test_counts <- function(input, binomial = TRUE, ...) { 
+  
+  #choose proper family
+  if (binomial) {
+    if(!(slot(input, "type") %in% c("tp", "tnp")))
+      #binarize input which isn't already binary
+      input <- binarize(input)
+    #family for model
+    fam <- quasibinomial(link = "log")
+    #function transforming coefficients of model to lambdas
+    trans_fun <- function(x) fl(exp(x))
+  } else {
+    if(slot(input, "type") %in% c("tp", "tnp"))
+      stop("Poisson regression require non-binary data.")
+    #family for model
+    fam <- quasipoisson(link = "log")
+    #function transforming coefficients of model to lambdas
+    trans_fun <- function(x) exp(x)
+  }
+  
   #dpcr version of melt
   n_vector <- slot(input, "n")
   m_dpcr <- do.call(rbind, lapply(1L:length(n_vector), function(i) {
@@ -33,71 +79,35 @@ test_counts <- function(input, ...) {
     data.frame(experiment = rep(colnames(input)[i], length(vals)), values = vals)
   }))
   
-  #remove intercept
-  fit <- glm(values ~ experiment + 0, data = m_dpcr, family = quasipoisson)
+  #fit model without
+  fit <- glm(values ~ experiment + 0, data = m_dpcr, family = fam)
+  
+  #do multiple comparision
   multi_comp <- glht(fit, linfct = mcp(experiment = "Tukey"))
   
   coefs <- summary(fit)[["coefficients"]][, 1:2]
-  lambdas <- exp(matrix(c(coefs[, 1], 
+  lambdas <- trans_fun(matrix(c(coefs[, 1], 
                           coefs[, 1] - coefs[, 2], 
                           coefs[, 1] + coefs[, 2]), ncol = 3))
   
   summ_mc <- summary(multi_comp)
   groups <- cld(multi_comp)[["mcletters"]][["LetterMatrix"]]
   if(is.matrix(groups)) {
-    groups_vector <- apply(groups, 1, which)
+    #more than one group
+    groups_vector <- apply(groups, 1, function(i)
+      paste0(colnames(groups)[i], collapse = ""))
   } else {
-    groups_vector <- rep(1, ncol(input))
+    #only one group
+    groups_vector <- rep("a", ncol(input))
+    names(groups_vector) <- colnames(input)
   }
-  
-  group_coef <- data.frame(LETTERS[groups_vector], lambdas)
+
+  group_coef <- data.frame(groups_vector, lambdas)
   colnames(group_coef) <- c("group", "lambda", "lambda.low", "lambda.up")
   rownames(group_coef) <- colnames(input)
   group_coef <- group_coef[order(group_coef[["group"]]), ]
   t_res <- cbind(t = summ_mc[["test"]][["tstat"]], 
                  p.value = summ_mc[["test"]][["pvalues"]])
-  new("count_test", group_coef = group_coef, t_res = t_res)
-}
-
-#old version with comments
-test_counts2 <- function(input) {
-  #   args <- c(Filter(Negate(is.null), list(...)))
-  #   if(length(args) > 1) {
-  #     input <- bind_dpcr(...)
-  #   } else {
-  #     input <- args[[1]]
-  #   }
-  
-  n_vector <- slot(input, "n")
-  
-  m_dpcr <- do.call(rbind, lapply(1L:length(n_vector), function(i) {
-    vals <- input[1L:n_vector[i], i]
-    data.frame(experiment = rep(colnames(input)[i], length(vals)), values = vals)
-  }))
-  
-  #remove intercept
-  fit <- glm(values ~ experiment + 0, data = m_dpcr, family = quasipoisson)
-  multi_comp <- glht(fit, linfct = mcp(experiment = "Tukey"))
-  #fit <- zeroinfl(values ~ experiment + 0, data = m_dpcr, dist = "poisson")
-  #   fit <- hurdle(values ~ experiment + 0, data = m_dpcr, dist = "poisson")
-  #   reps_vector <- rep(1, ncol(input))
-  #   names(reps_vector) <- colnames(input)
-  #   ctr_matrix <- contrMat(reps_vector, type = "Tukey")
-  #   ctr_matrix0 <- ctr_matrix[,] 
-  #   ctr_matrix0[,] <- 0 
-  # 
-  #   multi_comp <- glht(fit, linfct = cbind(ctr_matrix, ctr_matrix0))
-  
-  coefs <- summary(fit)[["coefficients"]][, 1:2]
-  lambdas <- exp(matrix(c(coefs[, 1], 
-                          coefs[, 1] - coefs[, 2], 
-                          coefs[, 1] + coefs[, 2]), ncol = 3))
-  
-  groups <- cld(multi_comp)[["mcletters"]][["LetterMatrix"]]
-  groups_vector <- apply(groups, 1, which)
-  res <- data.frame(LETTERS[groups_vector], lambdas)
-  colnames(res) <- c("group", "lambda", "lambda.low", "lambda.up")
-  rownames(res) <- colnames(input)
-  #
-  res
+  new("count_test", group_coef = group_coef, t_res = t_res, 
+      model = ifelse(binomial, "binomial", "Poisson"))
 }
