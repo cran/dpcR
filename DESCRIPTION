@@ -1,7 +1,7 @@
 Package: dpcR
 Type: Package
 Title: Digital PCR Analysis
-Version: 0.1.3.2
+Version: 0.1.3.3
 LazyData: true
 Date: 2014-12-22
 Authors@R: c(person("Michal", "Burdukiewicz", email =
@@ -16,7 +16,7 @@ Imports: binom, chipPCR, e1071, dgof, multcomp, qpcR, pracma,
         rateratio.test, signal, shiny, spatstat
 Suggests: knitr
 VignetteBuilder: knitr
-Packaged: 2014-12-24 12:50:00 UTC; Michal
+Packaged: 2015-02-24 09:18:51 UTC; Michal
 NeedsCompilation: no
 Repository: CRAN
 Collate: 'AUCtest.R' 'adpcr-class.R' 'adpcr2ppp.R' 'binarize.R'
@@ -33,6 +33,6 @@ Collate: 'AUCtest.R' 'adpcr-class.R' 'adpcr2ppp.R' 'binarize.R'
         'test_counts_gui.R' 'test_panel.R' 'test_peaks.R'
         'test_ratio.R' 'valid_amp.R' 'y_val_conf.R'
 Author: Michal Burdukiewicz [cre, aut],
-  Stefan Roediger [aut]
+    Stefan Roediger [aut]
 Maintainer: Michal Burdukiewicz <michalburdukiewicz@gmail.com>
-Date/Publication: 2014-12-24 17:02:48
+Date/Publication: 2015-02-24 11:01:54
