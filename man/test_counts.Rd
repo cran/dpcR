@@ -4,15 +4,15 @@
 \alias{test_counts}
 \title{Test counts}
 \usage{
-test_counts(input, binomial = TRUE, ...)
+test_counts(input, model = "binomial", conf.level = 0.95)
 }
 \arguments{
 \item{input}{adpcr or dpcr object with with "nm" type.}
 
-\item{binomial}{\code{logical}, if \code{TRUE} binomial regression
-is performed. If \code{FALSE}, Poisson regression is used instead.}
+\item{model}{may have one of following values: \code{binomial}, \code{poisson},
+\code{prop}, \code{ratio}.}
 
-\item{...}{additional arguments for \code{\link{glm}} function.}
+\item{conf.level}{confidence level of the intervals and groups.}
 }
 \value{
 an object of class \code{\linkS4class{count_test}}.
@@ -36,7 +36,7 @@ adpcr2 <- sim_adpcr(m = 60, n = 550, times = 1000, pos_sums = FALSE, n_panels = 
 adpcr3 <- sim_adpcr(m = 10, n = 600, times = 1000, pos_sums = FALSE, n_panels = 3)
 
 #compare experiments using binomial regression
-two_groups_bin <- test_counts(bind_dpcr(adpcr1, adpcr2), binomial = TRUE)
+two_groups_bin <- test_counts(bind_dpcr(adpcr1, adpcr2), model = "binomial")
 summary(two_groups_bin)
 plot(two_groups_bin)
 #plot aggregated results
@@ -45,7 +45,7 @@ plot(two_groups_bin, aggregate = TRUE)
 coef(two_groups_bin)
 
 #this time use Poisson regression
-two_groups_pois <- test_counts(bind_dpcr(adpcr1, adpcr2), binomial = FALSE)
+two_groups_pois <- test_counts(bind_dpcr(adpcr1, adpcr2), model = "poisson")
 summary(two_groups_pois)
 plot(two_groups_pois)
 
@@ -55,7 +55,7 @@ summary(one_group)
 plot(one_group)
 }
 \author{
-Michal Burdukiewicz, Stefan Roediger.
+Michal Burdukiewicz, Stefan Roediger, Piotr Sobczyk.
 }
 \references{
 Bretz F, Hothorn T, Westfall P, \emph{Multiple comparisons using R}.
@@ -66,7 +66,9 @@ Functions used by \code{test_counts}:
 \itemize{
 \item \code{\link[stats]{glm}},
 \item \code{\link[multcomp]{glht}},
-\item \code{\link[multcomp]{cld}}
+\item \code{\link[multcomp]{cld}},
+\item \code{\link[stats]{prop.test}},
+\item \code{\link[rateratio.test]{rateratio.test}}
 }
 
 GUI presenting capabilities of the test: \code{\link{test_counts_gui}}.

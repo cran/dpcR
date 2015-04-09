@@ -5,7 +5,7 @@
 \title{Calculate Density of Digital PCR}
 \usage{
 dpcr_density(k, n, average = FALSE, methods = "wilson", conf.level = 0.95,
-  plot = TRUE)
+  plot = TRUE, bars = FALSE, ...)
 }
 \arguments{
 \item{k}{Total number of positive molecules.}
@@ -26,6 +26,10 @@ Possible values are: \code{"wilson"}, \code{"agresti-coull"},
 interval. Values from 0 to 1 and -1 to 0 are acceptable.}
 
 \item{plot}{If \code{TRUE}, plots density plot.}
+
+\item{bars}{plot on density plot bars for discrete values of lambda.}
+
+\item{...}{Additional arguments send to \code{plot} function.}
 }
 \value{
 A data frame with one row containing bounds of the confidence
@@ -49,9 +53,9 @@ accessible as \link{dpcr_density_gui}.
 # confidence interval
 par(mfrow = c(1,2))
 dpcr_density(k = 25, n = 55, average = TRUE, methods = "wilson",
-	     conf.level = 0.9)
+	     conf.level = 0.95)
 dpcr_density(k = 25, n = 55, average = TRUE, methods = "wilson",
-	     conf.level = -0.9)
+	     conf.level = -0.95)
 
 # By setting average to FALSE the total number of positive molecules is
 # calculated

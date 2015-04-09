@@ -10,14 +10,14 @@
 #' \describe{ 
 #' \item{group_coef}{\code{"data.frame"} containing experiments, groups to which they
 #' belong and calculated values of rate (lambda).}
-#' \item{t_res}{\code{"matrix"} containing result of multiple comparisions t-test.} 
+#' \item{test_res}{\code{"matrix"} containing result of multiple comparisions t-test.} 
 #' \item{model}{\code{"character"} name of GLM used to compare experiments.} }
 #' @author Michal Burdukiewicz.
 #' @seealso \code{\link{test_counts}}.
 #' @export
 #' @keywords classes
 setClass("count_test", representation(group_coef = "data.frame", 
-                                      t_res = "matrix",
+                                      test_res = "matrix",
                                       model = "character"))
 
 #' @describeIn count_test Summary statistics of assigned groups.
@@ -34,7 +34,7 @@ setMethod("coef", signature(object = "count_test"), function(object) {
 })
 
 
-#' @describeIn count_test Print both \code{group_coef} and \code{t_res}.
+#' @describeIn count_test Print both \code{group_coef} and \code{test_res}.
 #' @export
 setMethod("show", "count_test", 
           function(object) {
@@ -42,8 +42,16 @@ setMethod("show", "count_test",
             print(slot(object, "group_coef"))
             
             cat("\nResults of multiple comparison:\n")
-            print(slot(object, "t_res"))
             
+            signif_stars <- symnum(slot(object, "test_res")[, "p_value"], corr = FALSE, na = FALSE, 
+                                    cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1), 
+                                    symbols = c("***", "**", "*", ".", " "))
+            print(data.frame(slot(object, "test_res"), signif = as.vector(signif_stars)))
+
+            cat("---\nSignif. codes:  ", attr(signif_stars, "legend"), sep = "", 
+                fill = getOption("width") + 4 + max(nchar(attr(signif_stars, "legend"), "bytes") 
+                                                    - nchar(attr(signif_stars, "legend"))))
+
             cat("\nModel used:\n")
             print(slot(object, "model"))
           })
