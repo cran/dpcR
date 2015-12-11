@@ -4,17 +4,17 @@
 #' objects of the class \code{\linkS4class{adpcr}} to or
 #' \code{\linkS4class{ddpcr}}.
 #' 
-#' The function prints summary of the dPCR reaction, including k (number of
+#' The function prints a summary of the dPCR reaction, including k (number of
 #' positive chambers), n (total number of chambers), estimated lambda and m
 #' (number of molecules per plate), as well as confidence intervals for the
 #' last two variables.
 #' 
 #' @name summary-methods
 #' @aliases summary-methods summary,adpcr-method summary,ddpcr-method summary
-#' summary.adpcr summary.ddpcr
+#' summary.adpcr summary.ddpcr summary,dpcr-method summary.dpcr
 #' @docType methods
-#' @param object an object of class \code{\linkS4class{adpcr}} or
-#' \code{\linkS4class{ddpcr}}.
+#' @param object an object of class \code{\linkS4class{adpcr}},
+#' \code{\linkS4class{ddpcr}} or \code{\linkS4class{qdpcr}}.
 #' @param print if \code{FALSE}, no output is printed.
 #' @return The data frame with estimated values of lambda, m and corresponding
 #' confidence intervals.
@@ -73,39 +73,34 @@
 NULL
 
 
-setMethod("summary", signature(object = "ddpcr"), function(object, print = TRUE) {
-  data <- slot(object, ".Data")
-  col_dat <-ncol(data)
-  type <- slot(object, "type")
-  n <- slot(object, "n")
-  
-  if (type %in% c("nm", "np")) 
-    k <- colSums(data > 0, na.rm = TRUE)
-  
-  if (type %in% c("tnp")) 
-    k <- data
-  
-  if (type %in% c("fluo")) 
-    k <- apply(data, 2, function(x) get_k_n(x, slot(object, "threshold")))
-  
-  invisible(print_summary(k, col_dat, type, n, print, colnames(data)))
-})
-
-setMethod("summary", signature(object = "adpcr"), function(object, print = TRUE) {
+setMethod("summary", signature(object = "dpcr"), function(object, print = TRUE) {
   data <- slot(object, ".Data")
   
   col_dat <- ncol(data)
   type <- slot(object, "type")
   n <- slot(object, "n")
   
-  if (type %in% c("fluo", "ct")) 
-    stop(paste0("Summary not currently implemented for data type ", type, "."), call. = TRUE, domain = NA)
+  if (type %in% c("ct"))
+    stop(paste0("'summary' is currently not implemented for data type ", type, "."))
   
-  if (type %in% c("nm", "np")) 
+  
+  if(class(object) == "adpcr")
+    if (type %in% c("fluo"))
+      stop(paste0("'summary' is currently not implemented for data type ", type, "."))
+  
+  if(class(object) == "ddpcr")
+    if (type %in% c("fluo")) 
+      k <- apply(data, 2, function(x) get_k_n(x, slot(object, "threshold")))
+  
+  if (type %in% c("nm", "np"))
     k <- colSums(data > 0, na.rm = TRUE)
   
   if (type %in% c("tnp")) 
     k <- data
   
-  invisible(print_summary(k, col_dat, type, n, print, colnames(data)))
+  invisible(print_summary(k = as.vector(k), col_dat = col_dat, n = as.vector(n), 
+                          print = print, run_names = colnames(data), 
+                          exper_names = slot(object, "exper"),
+                          replicate_names = slot(object, "replicate"),
+                          assay_names = slot(object, "assay")))
 })

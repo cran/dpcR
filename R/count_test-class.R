@@ -52,22 +52,22 @@ setMethod("show", "count_test",
                 fill = getOption("width") + 4 + max(nchar(attr(signif_stars, "legend"), "bytes") 
                                                     - nchar(attr(signif_stars, "legend"))))
 
-            cat("\nModel used:\n")
-            print(slot(object, "model"))
+            cat("\nTest: ", slot(object, "model"))
           })
 
 
 
 
-#' @describeIn count_test plots mean number of molecules per partition and its confidence intervals.
+#' @describeIn count_test plots mean number of molecules per partition and its 
+#' confidence intervals.
 #' @aliases plot.count_test plot,count_test-method plot,count_test,ANY-method
 #' @param x object of class \code{count_test}.
 #' @param aggregate logical, if \code{TRUE} experiments are aggregated according
 #' to their group.
 #' @param nice logical, if \code{TRUE} a more aesthetically pleasing (but harder to 
 #' customize) version of the plot is created.
-#' @details In case of aggregated plot, mean confidence intervals for groups are presented
-#' as dashed lines.
+#' @details In case of the aggregated plot, mean confidence intervals for groups are 
+#' presented as dashed lines.
 #' @export
 setMethod("plot", signature(x = "count_test"), function(x, aggregate = FALSE, 
                                                         nice = TRUE) {

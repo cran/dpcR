@@ -1,0 +1,168 @@
+---
+title: "dpcReport"
+author: "Michal Burdukiewicz, Stefan Roediger"
+date: ""
+output:
+html_document:
+css: report.css
+toc: true
+---
+
+# dpcReport
+
+```{r echo=FALSE, results='asis'}
+library(knitr)
+opts_chunk$set(echo=FALSE, results='asis', fig.align='center', fig.width=14, warning = FALSE)
+# TO DO add warning = FALSE later
+library(xtable)
+
+source("server_data.R")
+
+print_dpcrtable <- function(x)
+  print(xtable(x), type = "html", sanitize.colnames.function = function(x) x, digits = app_digits,
+        include.rownames = FALSE)
+
+new_dat <- change_data(input_dat(), as.factor(rep_names_new()), as.factor(exp_names_new()))
+```
+
+Report generated on `r Sys.time()` using [dpcR](http://github.com/michbur/dpcR) R package.  
+
+Detected input file: `r ifelse(is.null(input[["input_file"]][["name"]]), "none", input[["input_file"]][["name"]])`.  
+
+File format: `r ifelse(is.null(input[["input_file"]][["name"]]), "none", input[["input_type"]])`.  
+
+
+```{r}
+if(input[["data_summary_table_rep"]]) {
+  cat("## Data summary table    \n\n")
+  
+  source("./data_summary/summary_input.R", local = TRUE)
+  print_dpcrtable(res)
+  
+  cat(readLines("./data_summary/data_summary_table1.md"), sep = "    \n")
+}
+```
+
+
+
+```{r}
+if(input[["data_summary_scatter_rep"]]) {
+  cat("## Data summary scatter charts    \n\n")
+  
+  source("./summary_plots/summary_plot.R", local = TRUE)
+  p
+  
+  cat(readLines("./summary_plots/data_summary_scatterchart2.md"), sep = "    \n")
+}
+```
+
+```{r, fig.height=(5 + 0.3*nrow(summary_exprep_plot_dat()))}
+if(input[["data_summary_scatter_rep"]]) {
+  source("./summary_plots/summary_exprep_plot.R", local = TRUE)
+  p
+}
+```
+
+```{r}
+if(input[["data_summary_test_counts"]]) {
+  cat("## Compare runs    \n\n")
+  
+  cat(readLines("./test_counts/test_counts1.md"), sep = "    \n")
+  
+  source("./test_counts/test_counts_res.R", local = TRUE)
+  print_dpcrtable(res)
+  
+  cat(readLines("./test_counts/test_counts2.md"), sep = "    \n")
+  
+  source("./test_counts/test_counts_group.R", local = TRUE)
+  colnames(dat) <- c("Run", "Assigned group", "&lambda;", "&lambda; (lower CI)", "&lambda; (upper CI)", 
+                     "Experiment name", "Replicate ID", "k", "n")
+  
+  print_dpcrtable(dat)
+}
+```
+
+```{r, fig.height=(5 + 0.3*nrow(summary_exprep_plot_dat()))}
+if(input[["data_summary_test_counts"]]) {
+  source("./test_counts/test_counts_plot.R", local = TRUE)
+  p
+}
+```
+
+```{r}
+if(input[["data_summary_test_counts"]])
+  cat(readLines("./test_counts/test_counts3.md"), sep = "    \n")
+```
+
+```{r}
+if(input[["plot_panel"]]) {
+  cat("## All arrays    \n\n")
+  
+  
+  arrays <- adpcr2panel(new_dat, use_breaks = TRUE)
+  arrays_unbroken <- adpcr2panel(new_dat, use_breaks = FALSE)
+  
+  for (i in names(arrays)) {
+    single_array <- arrays_unbroken[[i]]
+    
+    cat("\n\n###", i ,"   \n\n")
+    
+    df <- calc_coordinates(arrays[[i]], half = "none")[["ggplot_coords"]]
+    df[["selected"]] <- rep(FALSE, nrow(df))
+    
+    source("./plot_panel/plot_panel.R", local = TRUE)
+    print(p + ggtitle(i))
+    
+    source("./plot_panel/test_panel.R", local = TRUE)
+    
+    cat(paste0("Array name: ", i, "<br>    ",
+               "Complete Spatial Randomness test statistic (", HTML("&Chi;"), "): ", 
+               round(res[["statistic"]], app_digits), "<br>    ",
+               "Df: ", res[["parameter"]], "<br>    ",
+               "Complete Spatial Randomness test p-value: ", round(res[["p.value"]], app_digits), "<br>    ",
+               "Method: ", res[["method"]][1], "<br>    ",
+               "Alternative: ", res[["alternative"]], "<br>    "), sep = "")
+  }
+}
+```
+
+
+```{r,eval=TRUE,results='asis'}
+if(input[["poisson_distr"]]) {
+  cat("## Probability distribution    \n\n")
+  
+  for(single_run_id in colnames(new_dat)) {
+    
+    cat("\n\n###", single_run_id ,"   \n\n")
+    
+    single_run <- extract_dpcr(new_dat, single_run_id)
+    
+    source("./prob_distr/single_run_moments.R", local = TRUE)
+    
+    print_dpcrtable(mom_tab)
+    
+    source("./prob_distr/get_kn.R", local = TRUE)
+    
+    source("./prob_distr/plot_density.R", local = TRUE)
+    
+    print(p + ggtitle(single_run_id))
+  }
+  
+}
+```
+
+
+```{r,eval=TRUE,results='asis'}
+if(input[["R_code"]]) {
+  cat("# R code    \n\n")
+  cat("The R code below may be used to recreate reported results.")
+  source("r_code_gen.R", local = TRUE)
+  cat(paste0(all_lines, collapse = "\n    "))
+}
+```
+
+# R Session
+
+```{r,results='markup'}
+sessionInfo()
+```

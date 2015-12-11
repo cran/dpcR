@@ -15,7 +15,7 @@
 #' 
 #' @param input object of the class \code{\linkS4class{adpcr}} or
 #' \code{\linkS4class{ddpcr}}.
-#' @param id vector of indices or names of experiments or panels.
+#' @param id vector of indices or names of runs.
 #' @return The object of the input's class (\code{\linkS4class{adpcr}} or
 #' \code{\linkS4class{ddpcr}}).
 #' @note The standard \code{\link[base]{Extract}} operator \code{x[i]} treats
@@ -33,7 +33,8 @@
 #' all_but_one <- extract_dpcr(panels, -5)
 #' 
 #' #the same for fluorescence data
-#' fluos <- sim_ddpcr(10, 40, 1000, pos_sums = FALSE, n_exp = 50, fluo = list(0.1, 0))
+#' fluos <- sim_ddpcr(10, 40, 1000, pos_sums = FALSE, n_exp = 50, 
+#'                    fluo = list(0.1, 0))
 #' single_fluo <- extract_dpcr(fluos, 5)
 #' 
 #' 
@@ -41,7 +42,12 @@
 extract_dpcr <- function(input, id) {
   if (!(class(input) %in% c("adpcr", "ddpcr")))
     stop("Input must have 'adpcr' or 'ddpcr' class.")
-  selected <- input[, id]
+  
+  #when id is a column name
+  if(!is.numeric(id)) 
+    id <- which(colnames(input) %in% id) 
+
+  selected <- input[, id, drop = FALSE]
   
   #because when id is single negative value, usually the
   #result has more than one column
@@ -49,8 +55,21 @@ extract_dpcr <- function(input, id) {
     selected <- matrix(selected, ncol = 1)
     colnames(selected) <- colnames(input)[id]
   }
+  
   result <- input
   slot(result, ".Data") <- selected
   slot(result, "n") <- slot(input, "n")[id]
+  slot(result, "exper") <- droplevels(slot(input, "exper")[id])
+  slot(result, "replicate") <- droplevels(slot(input, "replicate")[id])
+  slot(result, "assay") <- droplevels(slot(input, "assay")[id])
+  
+  
+  #in case of tnp type extract also columns names
+  if (class(input) == "adpcr") {
+    slot(result, "panel_id") <- droplevels(slot(input, "panel_id")[id])
+    if (slot(input, "type") == "tnp")
+      slot(result, "col_names") <- slot(input, "col_names")[id]
+  }
+  
   result
 }

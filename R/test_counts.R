@@ -5,14 +5,22 @@
 #' @aliases test_counts
 #' @param input adpcr or dpcr object with with "nm" type.
 #' @param model may have one of following values: \code{binomial}, \code{poisson},
-#' \code{prop}, \code{ratio}.
+#' \code{prop}, \code{ratio}. See Details.
 #' @param conf.level confidence level of the intervals and groups.
-#' @details \code{test_counts} fits counts data from different 
-#' digital PCR experiments to Generalized Linear Model (using quasibinomial
-#' or quasipoisson \code{\link[stats]{family}}). Comparisions between single experiments
-#' utilize Tukey's contrast and multiple t-tests (as provided by function \code{\link{glht}}).
-#' @note Mean number of template molecules per partitions and its confidence intervals are derived 
-#' from General Linear Models. Their values will vary depending on input.
+#' @details 
+#' \code{test_counts} incorporates two different approaches to models: GLM (General Linear 
+#' Model) and multiple pair-wise tests. The GLM fits counts data from different 
+#' digital PCR experiments using quasibinomial or quasipoisson \code{\link[stats]{family}}. 
+#' Comparisons between single experiments utilize Tukey's contrast and multiple t-tests 
+#' (as provided by function \code{\link{glht}}).
+#' 
+#' In case of pair-wise tests, (\code{\link[rateratio.test]{rateratio.test}} or 
+#' \code{\link[stats]{prop.test}}) are used to compare all pairs of experiments. The 
+#' p-values are adjusted using the Benjamini & Hochberg method (\code{\link[stats]{p.adjust}}).
+#' Furthermore, confidence intervals are simultaneous.
+#' 
+#' @note Mean number of template molecules per partitions and its confidence intervals will 
+#' vary depending on input.
 #' @export
 #' @seealso
 #' Functions used by \code{test_counts}: 
@@ -31,9 +39,13 @@
 #' @references Bretz F, Hothorn T, Westfall P, \emph{Multiple comparisons using R}. 
 #' Boca Raton, Florida, USA: Chapman & Hall/CRC Press (2010).
 #' @examples
+#' #be warned, the examples of test_counts are time-consuming
+#' \dontrun{
 #' adpcr1 <- sim_adpcr(m = 10, n = 765, times = 1000, pos_sums = FALSE, n_panels = 3)
 #' adpcr2 <- sim_adpcr(m = 60, n = 550, times = 1000, pos_sums = FALSE, n_panels = 3)
+#' adpcr2 <- rename_dpcr(adpcr2, exper = "Experiment2")
 #' adpcr3 <- sim_adpcr(m = 10, n = 600, times = 1000, pos_sums = FALSE, n_panels = 3)
+#' adpcr3 <- rename_dpcr(adpcr3, exper = "Experiment3")
 #' 
 #' #compare experiments using binomial regression
 #' two_groups_bin <- test_counts(bind_dpcr(adpcr1, adpcr2), model = "binomial")
@@ -53,15 +65,22 @@
 #' one_group <- test_counts(bind_dpcr(adpcr1, adpcr3))
 #' summary(one_group)
 #' plot(one_group)
+#' }
 
-test_counts <- function(input, model = "binomial", conf.level = 0.95) { 
+test_counts <- function(input, model = "ratio", conf.level = 0.95) { 
   if(!(model %in% c("binomial", "poisson", "prop", "ratio")))
     stop("Must must have one of following values: 'binomial', 'poisson', 'ratio' or 'prop'.")
   
   
   if(model %in% c("prop", "ratio")) {
     test_function <- if(model == "prop") prop.test else rateratio.test
-    positives <- colSums(input > 0, na.rm = TRUE)
+    
+    #extract number of positive partitions
+    positives <- if(slot(input, "type") == "tnp") {
+      slot(input, ".Data")[1, ]
+    } else {
+      colSums(input > 0, na.rm = TRUE)
+    }
     total <- slot(input, "n")
     #change sequence of rows to create output similar to glm
     test_ids <- combn(1L:length(total), 2)[c(2, 1), ]
@@ -71,7 +90,7 @@ test_counts <- function(input, model = "binomial", conf.level = 0.95) {
       test_ids <- as.matrix(test_ids)
     #perform one-against-one multiple proportion tests
     all_combns <- apply(test_ids, 2, function(i)
-      prop.test(positives[i], total[i]))
+      test_function(positives[i], total[i]))
     
     #adjust p-values
     p_vals <- p.adjust(sapply(all_combns, function(i)
@@ -84,12 +103,22 @@ test_counts <- function(input, model = "binomial", conf.level = 0.95) {
     #values of chi square statistic
     statistics <- sapply(all_combns, function(i)
       i[["statistic"]])
+
+    #what should be in res, depends on the model
+    test_res <-  if(model == "prop") {
+      matrix(c(statistics, p_vals), ncol = 2,
+             dimnames = list(apply(matrix(names(positives)[test_ids], ncol = 2, 
+                                          byrow= TRUE),1, function(i) 
+                                            paste(i, collapse = " - ")),
+                             c("X_squared", "p_value")))
+    } else {
+      matrix(p_vals, ncol = 1,
+             dimnames = list(apply(matrix(names(positives)[test_ids], ncol = 2, 
+                                          byrow= TRUE),1, function(i) 
+                                            paste(i, collapse = " - ")),
+                             c("p_value")))
+    }
     
-    test_res <- matrix(c(statistics, p_vals), ncol = 2,
-                       dimnames = list(apply(matrix(names(positives)[test_ids], ncol = 2, 
-                                                    byrow= TRUE),1, function(i) 
-                                                      paste(i, collapse = " - ")),
-                                       c("X_squared", "p_value")))
     
     #split data in groups
     #calculate confidence intervals using Sidak's unequality
@@ -125,19 +154,23 @@ test_counts <- function(input, model = "binomial", conf.level = 0.95) {
     if(is.null(dim(group_matrix)))
       group_matrix <- matrix(group_matrix, nrow = 1)
     #name groups using the abc convention and at the same time reorder them along to value
-    dimnames(group_matrix) <- list(letters[1L:length(groups)]
-                                   [order(sapply(groups, function(single_group) mean(group_vals[single_group, 1])))], names(positives))
+    dimnames(group_matrix) <- list((1L:length(groups))[order(sapply(groups, function(single_group) 
+                                     mean(group_vals[single_group, 1])))], 
+                                   names(positives))
     
     group_coef <- data.frame(apply(group_matrix, 2, function(i) 
-      paste(names(i[which(i)]), collapse = "")), 
+      paste(sort(as.numeric(names(i[which(i)]))), collapse = ".")), 
       group_vals)
     colnames(group_coef) <- c("group", "lambda", "lambda.low", "lambda.up")
     
   } else {
     
+    if(slot(input, "type") == "tnp")
+      stop("GLM does not work with 'tnp' type.")
+    
     #choose proper family
     if (model == "binomial") {
-      if(!(slot(input, "type") %in% c("tp", "tnp")))
+      if(!(slot(input, "type") %in% c("tp")))
         #binarize input which isn't already binary
         input <- binarize(input)
       #family for model
@@ -147,8 +180,7 @@ test_counts <- function(input, model = "binomial", conf.level = 0.95) {
     } 
     
     if (model == "poisson") {
-      if(slot(input, "type") %in% c("tp", "tnp"))
-        stop("Poisson regression requires non-binary data.")
+      
       #family for model
       fam <- quasipoisson(link = "log")
       #function transforming coefficients of model to lambdas
@@ -174,8 +206,8 @@ test_counts <- function(input, model = "binomial", conf.level = 0.95) {
                                   coefs[, 1] - coefs[, 2], 
                                   coefs[, 1] + coefs[, 2]), ncol = 3))
     
-    summ_mc <- summary(multi_comp, level = conf.level)
-    groups <- cld(multi_comp)[["mcletters"]][["LetterMatrix"]]
+    summ_mc <- suppressWarnings(summary(multi_comp))
+    groups <- suppressWarnings(cld(multi_comp)[["mcletters"]][["LetterMatrix"]])
     if(is.matrix(groups)) {
       #more than one group
       groups_vector <- apply(groups, 1, function(i)
@@ -192,6 +224,10 @@ test_counts <- function(input, model = "binomial", conf.level = 0.95) {
     test_res <- cbind(t = summ_mc[["test"]][["tstat"]], 
                       p_value = summ_mc[["test"]][["pvalues"]])
   }
+  
+  summ <- summary(input, print = FALSE)[["summary"]]
+  
+  group_coef <- cbind(group_coef, summ[summ[["method"]] == "bhat", c("experiment", "replicate", "k", "n")])
   
   new("count_test", group_coef = group_coef, test_res = test_res, 
       model = model)

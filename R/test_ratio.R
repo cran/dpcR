@@ -5,7 +5,7 @@
 #' 
 #' Objects \code{dpcr1} and \code{dpcr2} can be: \enumerate{ \item numeric
 #' vectors of length 2. The first element is assumed to be number of positive
-#' partitions and the second one to be the total number of partitions.  \item
+#' partitions and the second one to be the total number of partitions. \item
 #' numeric vectors of length greater than 2. The length of vector is assumed to
 #' represent total number of partitions. Every element of the vector with value
 #' bigger than 0 is assumed to be a positive partitions.  \item
@@ -40,7 +40,7 @@
 #' of method} \item{data.name}{description of data}
 #' @author Michael Fay, Michal Burdukiewicz, Stefan Roediger
 #' @seealso See also \code{\link[stats]{poisson.test}}.
-#' @references Fay M.P.  \emph{Two-sided exact tests and matching confidence
+#' @references Fay M.P. \emph{Two-sided exact tests and matching confidence
 #' intervals for discrete data} R Journal 2 (1), 2010.
 #' @keywords compare mean poisson
 #' @examples

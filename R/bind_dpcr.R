@@ -4,8 +4,8 @@
 #' \code{\link[base]{rbind}} tailored specially for binding multiple objects
 #' containing results from digital PCR experiments.
 #' 
-#' In case of \code{adpcr} or \code{ddpcr} objects, \code{bind_dpcr} can works
-#' analogously to \code{\link[base]{cbind}}), but without recycling. In case on
+#' In case of \code{adpcr} or \code{ddpcr} objects, \code{bind_dpcr} works
+#' analogously to \code{\link[base]{cbind}}, but without recycling. In case on
 #' unequal length, shorter objects will be filled in with additional \code{NA}
 #' values. The original length is always preserved in \code{n} slot.
 #' 
@@ -29,8 +29,7 @@
 #' @seealso Opposite function: \code{\link{extract_dpcr}}
 #' @keywords manip
 #' @export
-#' @include adpcr-class.R
-#' @include ddpcr-class.R
+#' @include classes.R
 #' @examples
 #' 
 #' bigger_array <- sim_adpcr(400, 765, 1000, pos_sums = FALSE, n_panels = 5)
@@ -65,16 +64,40 @@ setMethod("bind_dpcr",
                 all_args <- c(list(input), Filter(Negate(is.null), list(...)))
               }
             }
-              
+            
             all_classes <- all(sapply(all_args, class) == "adpcr")
             if (!all_classes)
               stop("All binded objects must have the same class.")
             bigger_breaks <- which.max(lapply(all_args, function(single_arg) 
               max(slot(single_arg, "breaks"))))
             breaks <- slot(all_args[[bigger_breaks]], "breaks")
+            
             res <- cbind_dpcr(all_args)
-            create_adpcr(res[["binded_data"]], 
-                         res[["n"]], breaks, type = res[["type"]])
+            
+            lapply(all_args, function(single_arg) 
+              slot(single_arg, "col_names"))
+            
+            
+            class(res) <- "adpcr"
+            
+            longer_colnames <- which.max(lapply(all_args, function(single_arg) 
+              length(slot(single_arg, "col_names"))))
+            col_names <- slot(all_args[[longer_colnames]], "col_names")
+            
+            longer_rownames <- which.max(lapply(all_args, function(single_arg) 
+              length(slot(single_arg, "row_names"))))
+            row_names <- slot(all_args[[longer_rownames]], "row_names")
+            
+            panel_ids <- bind_factor(lapply(all_args, function(single_arg) 
+              slot(single_arg, "panel_id")))
+            
+            
+            slot(res, "breaks") <- breaks
+            slot(res, "col_names") <- col_names
+            slot(res, "row_names") <- row_names
+            slot(res, "panel_id") <- panel_ids
+            res
+            
           })
 
 
@@ -99,10 +122,15 @@ setMethod("bind_dpcr",
             
             bigger_thresholds <- which.max(lapply(all_args, function(single_arg) 
               max(slot(single_arg, "threshold"))))
-            thresholds <- slot(all_args[[bigger_thresholds]], "threshold")
+            thresholds <- slot(all_args[[bigger_thresholds]], "threshold")        
             res <- cbind_dpcr(all_args)
-            create_ddpcr(res[["binded_data"]], 
-                         res[["n"]], thresholds, type = res[["type"]])
+            
+            #             create_ddpcr(res[["binded_data"]], 
+            #                          n = res[["n"]], threshold = thresholds, type = res[["type"]])
+            
+            class(res) <- "ddpcr"
+            slot(res, "threshold") <- thresholds
+            res
           })
 
 
@@ -115,28 +143,59 @@ cbind_dpcr <- function(all_args) {
     stop("Input objects must have the same type.")
   type <- unique(all_types)
   
+  all_expers <- unlist(lapply(all_args, function(single_arg) 
+    slot(single_arg, "exper")))
+  
+  all_replicates <- unlist(lapply(all_args, function(single_arg) 
+    slot(single_arg, "replicate")))
+  
+  all_assays <- unlist(lapply(all_args, function(single_arg) 
+    slot(single_arg, "assay")))
   
   #check partitions and add NA values if needed
   all_partitions <- unlist(lapply(all_args, function(single_arg) 
     slot(single_arg, "n")))
-  n_max <- max(all_partitions)
-  if (length(unique(all_partitions)) > 1) {
-    message("Different number of partitions. Shorter objects completed with NA values.")
-    for(i in 1L:length(all_args)) {
-      rows_to_add <- n_max - nrow(all_args[[i]])
-      if (rows_to_add > 0)
-        all_args[[i]] <- rbind(all_args[[i]], 
-                           matrix(rep(NA, ncol(all_args[[i]])*rows_to_add), 
-                                  nrow = rows_to_add))
+  
+  if (slot(all_args[[1]], "type") != "tnp") {
+    n_max <- max(all_partitions)
+    
+    if (length(unique(all_partitions)) > 1) {
+      message("Different number of partitions. Shorter objects completed with NA values.")
+      for(i in 1L:length(all_args)) {
+        rows_to_add <- n_max - nrow(all_args[[i]])
+        if (rows_to_add > 0)
+          all_args[[i]] <- rbind(all_args[[i]], 
+                                 matrix(rep(NA, ncol(all_args[[i]])*rows_to_add), 
+                                        nrow = rows_to_add))
+      }
     }
   }
   
-  
   binded_data <- do.call(cbind, all_args)
   
-  col_names <- unlist(lapply(1L:length(all_args), function(i)
-    paste0(i, ".", 1L:ncol(all_args[[i]]))))
+  #   col_names <- unlist(lapply(1L:length(all_args), function(i)
+  #     paste0(i, ".", 1L:ncol(all_args[[i]]))))
+  #   
+  #   colnames(binded_data) <- col_names
+  #  list(binded_data = binded_data, type = type, n = all_partitions)
   
-  colnames(binded_data) <- col_names
-  list(binded_data = binded_data, type = type, n = all_partitions)
+  construct_dpcr(data = binded_data, n = all_partitions, 
+                 exper = all_expers, 
+                 replicate = all_replicates,
+                 assay = all_assays,
+                 type = type)
+}
+
+# binds factors (for example panel_id), but keeps unique values unique
+# i.e. when in both factors levels have value 1, after binding the elements
+# with level 1 in both factors would have different levels
+bind_factor <- function(fact_list) {
+  levs <- lapply(1L:length(fact_list), function(i) paste0(levels(fact_list[[i]]), "_", i))
+  fact_vec <- unlist(lapply(1L:length(fact_list), function(i) {
+    res <- fact_list[[i]]
+    levels(res) <- levs[[i]]
+    res
+  }))
+  levels(fact_vec) <- 1L:length(levels(fact_vec))
+  fact_vec
 }

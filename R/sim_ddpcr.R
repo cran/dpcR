@@ -35,7 +35,7 @@
 #' positive integers of the length \code{n} or 1.
 #' @return If the \code{pos_sums} argument has value \code{FALSE}, the function
 #' returns matrix with \eqn{n} rows and \eqn{n_panels} columns. Each column
-#' represents one plate. Type of such simulation would be \code{"nm"}. If the
+#' represents one plate. The type of such simulation would be \code{"nm"}. If the
 #' \code{pos_sums} argument has value \code{TRUE}, the function return matrix
 #' with one row and \eqn{n_panels} columns. Each column contains the total
 #' number of positive chambers in each plate and type of simulation would be
@@ -75,7 +75,7 @@ sim_ddpcr <- function(m, n, times, n_exp = 1, dube = FALSE, pos_sums = FALSE,
   type = ifelse(pos_sums, "tnp", "nm")
   if (!is.null(fluo))
     type <- "fluo"
-  create_ddpcr(res, rep(n, n_exp), threshold = 0.5, type = type)
+  create_ddpcr(res, n = rep(n, n_exp), threshold = 0.5, type = type)
 }
 
 
