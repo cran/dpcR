@@ -222,7 +222,7 @@ par(mfrow=c(1,1))
 
 
 ## ----eval=TRUE,echo=FALSE------------------------------------------------
-ggplot(data=madpcr_comp,aes(x = value, fill = method)) +
+ggplot(data=madpcr_comp, aes(x = value, fill = method)) +
   geom_density(alpha = 0.3) + 
   scale_fill_discrete("Confidence intervals:") + 
   scale_y_continuous("Density") + 
@@ -235,7 +235,7 @@ ggplot(m_coverage2, aes(x = prop, y = value, fill = method)) +
   scale_y_continuous("Probability coverage") + 
   scale_x_discrete(expression(lambda)) +
   scale_fill_discrete("Confidence intervals:") + 
-  geom_hline(y = 0.95, colour = "black", size = 1, linetype = 5) +
+  geom_hline(yintercept = 0.95, colour = "black", size = 1, linetype = 5) +
   facet_wrap(~ coverage, nrow = 2) + 
   cool_theme
 
