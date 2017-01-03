@@ -5,7 +5,7 @@
 \title{Create dpcR object}
 \usage{
 create_dpcr(data, n, exper = "Experiment 1", replicate = NULL,
-  assay = "Unknown", type, threshold = NULL, breaks = NULL, adpcr,
+  assay = "Unknown", type, v = 1, uv = 0, threshold = NULL, adpcr,
   col_names = NULL, row_names = NULL, panel_id = NULL)
 }
 \arguments{
@@ -26,15 +26,16 @@ number of positive wells in the panel), \code{"fluo"} (fluorescence), \code{"np"
 (status (positive (1) or negative(0)) of each droplet) or\code{"ct"} 
 (threshold cycle).}
 
+\item{v}{The volume of partitions [nL].}
+
+\item{uv}{The volume uncertainty of partitions [nl].}
+
 \item{threshold}{\code{numeric} value giving the threshold above which
 droplet is counted as positive.  Ignored if \code{adpcr} is \code{TRUE}.}
 
-\item{breaks}{\code{numeric} vector giving the number of intervals into
-which \code{data} should be cut. Ignored if \code{adpcr} is \code{FALSE}.}
-
 \item{adpcr}{\code{logical}. If \code{TRUE}, function creates
 \code{\linkS4class{adpcr}} object. If \code{FALSE}, function creates
-\code{\linkS4class{ddpcr}} object.}
+\code{\linkS4class{dpcr}} object.}
 
 \item{col_names}{\code{character} vector of column names in array. Ignored if not
 \code{adcpr}.}
@@ -46,10 +47,10 @@ which \code{data} should be cut. Ignored if \code{adpcr} is \code{FALSE}.}
 \code{adcpr}.}
 }
 \value{
-An \code{\linkS4class{adpcr}} or \code{\linkS4class{ddpcr}} object.
+An \code{\linkS4class{adpcr}} or \code{\linkS4class{dpcr}} object.
 }
 \description{
-Creates \code{\linkS4class{adpcr}} and \code{\linkS4class{ddpcr}}
+Creates \code{\linkS4class{adpcr}} and \code{\linkS4class{dpcr}}
 objects from data.
 }
 \details{
@@ -83,6 +84,9 @@ plot_panel(sample_adpcr, 45, 17)
 }
 \author{
 Michal Burdukiewicz, Stefan Roediger.
+}
+\seealso{
+Streamlined, but more limited version: \code{\link{df2dpcr}}
 }
 \keyword{adPCR}
 \keyword{ddPCR}

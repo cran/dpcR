@@ -18,21 +18,20 @@ For more in-depth explanation of digital PCR data structure, see
 \section{Slots}{
 
 \describe{
-\item{\code{breaks}}{\code{"numeric"} vector giving the number of intervals into which 
-\code{.Data} should be cut. The second element in \code{breaks} vector is considered 
-a threshold. Partition above or equal to threshold is counted as 
-positive.}
+\item{\code{col_names}}{\code{"character"} vector naming columns in the array.}
 
-\item{\code{col_names}}{\code{"character"} vector naming the columns in the array.}
+\item{\code{row_names}}{\code{"character"} vector naming rows in the array.}
 
-\item{\code{row_names}}{\code{"character"} vector naming the rows in the array.}
+\item{\code{row_id}}{\code{"integer"} vector providing row indices of all runs.}
+
+\item{\code{col_id}}{\code{"integer"} vector providing column indices of all runs.}
 
 \item{\code{panel_id}}{\code{"factor"} naming the panel to which experiment belong.}
 }}
 \examples{
 
 rand_array <- sim_adpcr(400, 1600, 100, pos_sums = FALSE, n_panels = 5)
-one_rand_array <- extract_dpcr(rand_array, 1)
+one_rand_array <- extract_run(rand_array, 1)
 plot_panel(one_rand_array, 40, 40)
 
 }
@@ -41,7 +40,7 @@ Michal Burdukiewicz.
 }
 \seealso{
 Data management: \code{\link{adpcr2panel}}, \code{\link{bind_dpcr}},
-\code{\link{extract_dpcr}}.
+\code{\link{extract_run}}.
 
 Plotting: \code{\link{plot_panel}}.
 
@@ -51,7 +50,7 @@ Simulation: \code{\link{sim_adpcr}}.
 
 Real-time array digital PCR: \code{\linkS4class{rtadpcr}}.
 
-Droplet digital PCR: \code{\linkS4class{ddpcr}}.
+Droplet digital PCR: \code{\linkS4class{dpcr}}.
 }
 \keyword{classes}
 

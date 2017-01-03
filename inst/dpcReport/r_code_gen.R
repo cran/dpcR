@@ -5,6 +5,8 @@ separator <- "\n    \n    ###############"
 
 setup_l <- c("# Load packages",
              'library(dpcR)',
+             '# if you do not have dpcR package, install it from GitHub:',  
+             '# devtools::install_github("michbur/dpcR")',
              if(input[["data_summary_scatter_rep"]] || input[["data_summary_test_counts"]] || input[["plot_panel"]] || input[["poisson_distr"]])
                c('library(ggplot2) # ggplot2 library for nice plots',
                  "# Define theme for plots",
@@ -25,20 +27,6 @@ read_data_l <- c("# Read and adjust data", if(is.null(input[["input_file"]])) {
                BioMark_sum = 'input_data <- read_dpcr("file_name", format = "BioMark", detailed = FALSE)')))
 })
 
-change_replicate_l <- if(any(as.character(slot(input_dat(), "replicate")) != rep_names_new())) {
-  paste0('slot(input_data, "replicate") <- factor(', 
-         paste0(capture.output(dput(rep_names_new())), collapse = ""), ')')
-} else {
-  ""
-}
-
-change_exper_l <- if(any(as.character(slot(input_dat(), "exper")) != exp_names_new())) {
-  paste0('slot(input_data, "exper") <- factor(', 
-         paste0(capture.output(dput(exp_names_new())), collapse = ""), ')')
-} else {
-  ""
-}
-
 data_summary_table_lc <- if(input[["data_summary_table_rep"]]) {
   c(separator, '# Print only table from summary.dpcr function',
     'summary(input_data, print = FALSE)[["summary"]]')
@@ -46,17 +34,16 @@ data_summary_table_lc <- if(input[["data_summary_table_rep"]]) {
   ""
 }
 
-
 data_summary_scatter_lc <- if(input[["data_summary_scatter_rep"]]) {
   c(separator, '# Prepare data for plots',
     'plot_data <- summary(input_data, print = FALSE)[["summary"]]',
     paste0('plot_data <- plot_data[plot_data[["method"]] == "', input[["CI_method"]], '", ]'),
     # Plot boxplot',
-    paste0('ggplot(plot_data, aes(x = experiment, y = lambda, ymax = lambda.up, ymin = lambda.low)) + geom_point(size = 4, alpha = 0.6, lty = 2, colour = "blue") + cool_theme + geom_boxplot(outlier.colour = NA, fill = adjustcolor("lightgrey", alpha.f = 0.25), shape = 15) + ggtitle(paste0("Experiment boxplot\\nCI method: ", "', input[["CI_method"]], '")) + scale_x_discrete("Experiment name") + scale_y_continuous(expression(lambda))'),
+    paste0('ggplot(plot_data, aes(x = experiment, y = lambda, ymax = lambda.up, ymin = lambda.low)) + geom_point(size = 4, alpha = 0.6, shape = 2, colour = "blue") + cool_theme + geom_boxplot(outlier.colour = NA, fill = adjustcolor("lightgrey", alpha.f = 0.25), shape = 15) + ggtitle(paste0("Experiment boxplot\\nCI method: ", "', input[["CI_method"]], '")) + scale_x_discrete("Experiment name") + scale_y_continuous(expression(lambda))'),
     '# Add new column, unique for every experiment/replicate combination',
     'plot_data[["exprep"]] <- factor(paste0(plot_data[["experiment"]], "\\n", plot_data[["replicate"]]))',
     '\n    # Plot stripchart',
-    paste0('ggplot(plot_data, aes(y = exprep, x = lambda, colour = experiment, ymin = exprep, ymax = exprep)) + geom_point(size = 4) + cool_theme + ggtitle(paste0("Experiment/replicate scatter chart\\nCI method: ", "', input[["CI_method"]], '")) + scale_y_discrete("Replicate id", labels = plot_data[["replicate"]]) + scale_x_continuous(expression(lambda)) + scale_color_discrete("Experiment name") + geom_errorbarh(aes(x = lambda, xmin = lambda.low, xmax = lambda.up), size = 1.2, heigth = nlevels(plot_data[["exprep"]])/160)'))
+    paste0('ggplot(plot_data, aes(y = exprep, x = lambda, colour = experiment, ymin = exprep, ymax = exprep)) + geom_point(size = 4) + cool_theme + ggtitle(paste0("Experiment/replicate scatter chart\\nCI method: ", "', input[["CI_method"]], '")) + scale_y_discrete("Replicate id", labels = plot_data[["replicate"]]) + scale_x_continuous(expression(lambda)) + scale_color_discrete("Experiment name") + geom_errorbarh(aes(x = lambda, xmin = lambda.low, xmax = lambda.up), size = 1.2, height = nlevels(plot_data[["exprep"]])/160)'))
 } else {
   ""
 }
@@ -73,7 +60,7 @@ data_summary_test_counts_lc <- if(input[["data_summary_test_counts"]]) {
     '# Add "run" column to prepare data for plot',
     'run_coefs[["run"]] <- as.factor(rownames(run_coefs))',
     '\n    # Plot coefficients',
-    'ggplot(run_coefs, aes(y = run, x = lambda, colour = experiment, label = group)) + geom_point(size = 4) + cool_theme + geom_text(aes(x = lambda.up, y = run), show_guide = FALSE, hjust = -0.25, vjust = 0) + ggtitle("Grouped experiments") + scale_y_discrete("Replicate id", labels = run_coefs[["replicate"]] ) + scale_x_continuous(expression(lambda)) + coord_cartesian(xlim = c(ifelse(min(run_coefs[["lambda.low"]]) > 0, min(run_coefs[["lambda.low"]]) * 0.9, min(run_coefs[["lambda.low"]]) * 1.1), ifelse(max(run_coefs[["lambda.up"]]) < 0,  max(run_coefs[["lambda.up"]]) * 0.9, max(run_coefs[["lambda.up"]]) * 1.1))) + scale_size_discrete(guide = FALSE, range = c(5, 7)) + scale_color_discrete("Experiment name") + geom_errorbarh(aes(x = lambda, xmin = lambda.low, xmax = lambda.up), size = 1.2, heigth = nlevels(run_coefs[["run"]])/160)')
+    'ggplot(run_coefs, aes(y = run, x = lambda, colour = experiment, label = group)) + geom_point(size = 4) + cool_theme + geom_text(aes(x = lambda.up, y = run), show.legend = FALSE, hjust = -0.25, vjust = 0) + ggtitle("Grouped experiments") + scale_y_discrete("Replicate id", labels = run_coefs[["replicate"]] ) + scale_x_continuous(expression(lambda)) + coord_cartesian(xlim = c(ifelse(min(run_coefs[["lambda.low"]]) > 0, min(run_coefs[["lambda.low"]]) * 0.9, min(run_coefs[["lambda.low"]]) * 1.1), ifelse(max(run_coefs[["lambda.up"]]) < 0,  max(run_coefs[["lambda.up"]]) * 0.9, max(run_coefs[["lambda.up"]]) * 1.1))) + scale_size_discrete(guide = FALSE, range = c(5, 7)) + scale_color_discrete("Experiment name") + geom_errorbarh(aes(x = lambda, xmin = lambda.low, xmax = lambda.up), size = 1.2, height = nlevels(run_coefs[["run"]])/160)')
 } else {
   ""
 }
@@ -84,7 +71,7 @@ plot_panel_lc <- if(input[["plot_panel"]]) {
            ifelse(is.null(input[["nx"]]), 5, input[["nx"]]), ', ',
            'ny = ', ifelse(is.null(input[["ny"]]), 5, input[["ny"]]), ')'),
     '# Plot panels, use "panels_plot[[1]]" to see the first array and so on',
-    'panels_plot <- lapply(adpcr2panel(input_data), function(single_array) { ggplot(calc_coordinates(single_array, half = "none")[["ggplot_coords"]], aes(x = col, y = row , fill = as.factor(value))) + geom_tile(colour = "black", linetype = 2) + cool_theme  + scale_x_discrete("Column") + scale_y_discrete("Row") + scale_fill_discrete("Value") + theme(panel.border = element_blank(), panel.background = element_blank())})')
+    'panels_plot <- lapply(adpcr2panel(input_data), function(single_array) { ggplot(calc_coordinates(single_array, half = "none")[["ggplot_coords"]], aes(x = col, y = row , fill = value)) + geom_tile(colour = "black", linetype = 2) + cool_theme  + scale_x_discrete("Column") + scale_y_discrete("Row") + theme(panel.border = element_blank(), panel.background = element_blank())})')
 } else {
   ""
 }
@@ -114,7 +101,7 @@ poisson_distr_lc <- if(input[["poisson_distr"]]) {
 }
 
 all_lines <- c("\n    ", setup_l,
-               read_data_l, change_replicate_l, change_exper_l, #input
+               read_data_l, #input
                data_summary_table_lc, #summary table
                data_summary_scatter_lc, #summary plots
                data_summary_test_counts_lc,

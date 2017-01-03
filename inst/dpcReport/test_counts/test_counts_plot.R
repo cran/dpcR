@@ -6,7 +6,7 @@ p <- ggplot(dat, aes(y = run, x = lambda, shape = selected, colour = experiment,
                      linetype = selected, label = group)) +
   geom_point(size = 4) + cool_theme +
   geom_text(aes(x = lambda.up, y = run, size = selected), 
-            show_guide = FALSE, hjust = -0.25, vjust = 0) +
+            show.legend = FALSE, hjust = -0.25, vjust = 0) +
   ggtitle("Grouped experiments") +
   scale_y_discrete("Replicate id", labels = dat[["replicate"]] ) +
   scale_x_continuous(expression(lambda)) + 
@@ -21,4 +21,4 @@ p <- ggplot(dat, aes(y = run, x = lambda, shape = selected, colour = experiment,
   scale_linetype_manual(guide = FALSE, values = c("solid", "dashed")) + 
   scale_shape_manual(guide = FALSE, values = c(15, 18)) + 
   geom_errorbarh(aes(x = lambda, xmin = lambda.low, xmax = lambda.up), 
-                size = 1.2, heigth = nlevels(dat[["run"]])/160)
+                size = 1.2, height = nlevels(dat[["run"]])/160)

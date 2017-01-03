@@ -1,6 +1,6 @@
 #' Create dpcR object
 #' 
-#' Creates \code{\linkS4class{adpcr}} and \code{\linkS4class{ddpcr}}
+#' Creates \code{\linkS4class{adpcr}} and \code{\linkS4class{dpcr}}
 #' objects from data.
 #' 
 #' @details 
@@ -22,10 +22,10 @@
 #' @param exper The id of experiments.
 #' @param replicate The id of technical replicates.
 #' @param assay The name or id of assays.
+#' @param v The volume of partitions [nL].
+#' @param uv The volume uncertainty of partitions [nl].
 #' @param threshold \code{numeric} value giving the threshold above which
 #' droplet is counted as positive.  Ignored if \code{adpcr} is \code{TRUE}.
-#' @param breaks \code{numeric} vector giving the number of intervals into
-#' which \code{data} should be cut. Ignored if \code{adpcr} is \code{FALSE}.
 #' @param type Object of class \code{"character"} defining type of data. Could
 #' be \code{"nm"} (number of molecules per partition), \code{"tnp"} (total
 #' number of positive wells in the panel), \code{"fluo"} (fluorescence), \code{"np"} 
@@ -33,15 +33,16 @@
 #' (threshold cycle).
 #' @param adpcr \code{logical}. If \code{TRUE}, function creates
 #' \code{\linkS4class{adpcr}} object. If \code{FALSE}, function creates
-#' \code{\linkS4class{ddpcr}} object.
+#' \code{\linkS4class{dpcr}} object.
 #' @param col_names \code{character} vector of column names in array. Ignored if not
 #' \code{adcpr}.
 #' @param row_names \code{character} vector of row names in array. Ignored if not
 #' \code{adcpr}.
 #' @param panel_id \code{factor} vector of panel IDs (or names). Ignored if not
 #' \code{adcpr}.
-#' @return An \code{\linkS4class{adpcr}} or \code{\linkS4class{ddpcr}} object.
+#' @return An \code{\linkS4class{adpcr}} or \code{\linkS4class{dpcr}} object.
 #' @author Michal Burdukiewicz, Stefan Roediger.
+#' @seealso Streamlined, but more limited version: \code{\link{df2dpcr}}
 #' @keywords ddPCR adPCR
 #' @examples
 #' 
@@ -61,14 +62,15 @@
 #' @export create_dpcr
 
 create_dpcr <- function(data, n, exper = "Experiment 1", 
-                        replicate = NULL, assay = "Unknown", type, threshold = NULL,
-                        breaks = NULL, adpcr, col_names = NULL, row_names = NULL, panel_id = NULL) {
+                        replicate = NULL, assay = "Unknown", type, v = 1, uv = 0, threshold = NULL, 
+                        adpcr, col_names = NULL, row_names = NULL, panel_id = NULL) {
   if(adpcr) {
     create_adpcr(data = data, n = n, exper = exper, 
-                 replicate = replicate, assay = assay, type = type, breaks = breaks,
-                 col_names = col_names, row_names = row_names, panel_id = panel_id)
+                 replicate = replicate, assay = assay, type = type, v = v, uv = uv,
+                 col_names = col_names, row_names = row_names, panel_id = panel_id, 
+                 threshold = threshold)
   } else {
-    create_ddpcr(data = data, n = n, exper = exper, replicate = replicate, 
-                 assay = assay, type = type, threshold = threshold)
+    construct_dpcr(data = data, n = n, exper = exper, replicate = replicate, 
+                 assay = assay, v = v, uv = uv, type = type, threshold = threshold)
   }
 }

@@ -4,11 +4,13 @@
 \alias{read_QX100}
 \title{Read QX100}
 \usage{
-read_QX100(input)
+read_QX100(input, ext = NULL)
 }
 \arguments{
 \item{input}{name of the input file (\code{character}) or input object 
 (\code{data.frame}).}
+
+\item{ext}{extension of the file ().}
 }
 \value{
 An object of \code{\linkS4class{adpcr}} class.
@@ -16,8 +18,17 @@ An object of \code{\linkS4class{adpcr}} class.
 \description{
 Reads digital PCR data from the QX100 Droplet Digital PCR System (Bio-Rad).
 }
+\note{
+The volume and its uncertainty are taken from the literature (see 
+references).
+}
 \author{
 Michal Burdukiewcz, Stefan Roediger
+}
+\references{
+Corbisier, P. et al (2015). DNA copy number concentration measured by digital 
+and droplet digital quantitative PCR using certified reference materials. 
+Analytical and Bioanalytical Chemistry 407, 1831-1840.
 }
 \seealso{
 See \code{\link{read_dpcr}} for detailed description of input files.

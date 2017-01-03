@@ -1,7 +1,9 @@
 library(shiny)
 library(shinythemes)
+library(rhandsontable)
 
 shinyUI(navbarPage(title = "dpcReport",
+                   header = includeScript("ga.js"),
                    theme = shinytheme("cerulean"),
                    id = "navbar", windowTitle = "dpcReport", collapsible=TRUE,
                    tabPanel("Input file",
@@ -10,18 +12,18 @@ shinyUI(navbarPage(title = "dpcReport",
                               column(2, fileInput("input_file", 
                                                   h4("Choose dPCR data"))),
                               column(2, selectInput("input_type", label = h4("Select data format"), 
-                                                    choices = list("Raw data (adpcr)" = "raw_adpcr", 
-                                                                   "Raw data (ddpcr)" = "raw_ddpcr",
+                                                    choices = list("REDF (raw format)" = "redf", 
                                                                    "QX100" = "QX100",
+                                                                   "QX200" = "QX200",
                                                                    "BioMark (Detailed Table Results)" = "BioMark_det",
-                                                                   "BioMark (Summary Table Results)" = "BioMark_sum"))),
+                                                                   "BioMark (Summary Table Results)" = "BioMark_sum",
+                                                                   "Amplitude data (.zip)" = "amp"))),
                               column(3, htmlOutput("input_information"))
                             ),
                             includeMarkdown("input_file2.md"),
-                            fluidRow(
-                              column(3, h4("Experiment name"), htmlOutput("exp_choice")),
-                              column(3, h4("Technical repeat ID"), htmlOutput("rep_choice"))
-                            )
+                            rHandsontableOutput("input_table"),
+                            br(),
+                            br()
                    ),
                    navbarMenu("Data summary",
                               tabPanel("Summary table", 
@@ -125,8 +127,10 @@ shinyUI(navbarPage(title = "dpcReport",
                                           value = TRUE),
                             p("Be patient. The generation of the report may take few minutes."),
                             downloadButton("report_download_button", 
-                                           "Save report")),
+                                           "Save report"),
+                            downloadButton("input_download_button", 
+                                           "Save input data (.csv)")),
                    tabPanel("About", 
-                            includeMarkdown("about.md")),
-                   tabPanel("Quit", actionButton("quit_button", "Press the button to quit dpcReport"))
+                            includeMarkdown("about.md"))
+                   #tabPanel("Restart app", actionButton("quit_button", "Quit dpcReport"))
 ))

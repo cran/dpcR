@@ -4,14 +4,16 @@
 \alias{read_dpcr}
 \title{Read digital PCR data}
 \usage{
-read_dpcr(input, format, ...)
+read_dpcr(input, format, ext = NULL, ...)
 }
 \arguments{
 \item{input}{name of the input file (\code{character}) or input object 
 (\code{data.frame}).}
 
 \item{format}{of the file, for example: \code{"raw"}, \code{"QX100"}, 
-\code{"BioMark"}.}
+\code{"BioMark"}, \code{"amp"} (raw amplitude compressed using \code{.zip}).}
+
+\item{ext}{extension of the file ().}
 
 \item{...}{additional parameters for the appropriate function. For example, if 
 \code{format} has value \code{"raw"}, the additional parameter must be 
@@ -19,7 +21,7 @@ read_dpcr(input, format, ...)
 }
 \value{
 Always an object of \code{\linkS4class{adpcr}} or 
-\code{\linkS4class{ddpcr}} type.
+\code{\linkS4class{dpcr}} type.
 }
 \description{
 Reads digital PCR data in various formats.
@@ -32,9 +34,10 @@ with multiple sheets, only the first sheet will be analyzed.
 Michal Burdukiewcz, Stefan Roediger
 }
 \seealso{
-Read raw format files: \code{\link{read_raw}}.
+Read raw format files: \code{\link{read_redf}}.
 Read BioMark format files: \code{\link{read_BioMark}}.
 Read QX100 format files: \code{\link{read_QX100}}.
+Read QX200 format files: \code{\link{read_QX200}}.
 }
 \keyword{utilities}
 

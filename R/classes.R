@@ -9,8 +9,12 @@
 #' @slot .Data \code{matrix} data from digital PCR experiments. See Details.
 #' @slot n \code{integer} equal to the number of partitions in each run.
 #' @slot exper \code{factor} the id or name of experiments.
-#' @slot replicate \code{factor} the id or name of replicate.
+#' @slot replicate \code{factor} the id or name of replicates.
 #' @slot assay \code{factor} the id or name of the assay.
+#' @slot v \code{"numeric"} volume of the partition [nL].
+#' @slot uv \code{"numeric"} uncertainty of the volume of the partition [nL]. 
+#' @slot threshold \code{"numeric"} value specifying the threshold. Partition with 
+#' the value equal or bigger than threshold are considered positive.
 #' @slot type Object of class \code{"character"} defining type of data. See Details.
 #' @details
 #' Possible \code{type} values of \code{dpcr} objects:
@@ -35,20 +39,34 @@
 #' The structure of \code{dpcr} class is described more deeply in the vignette.
 #' @author Michal Burdukiewicz.
 #' @note 
-#' This class should not be directly used. Instead, users should use more 
-#' specific class: \code{\linkS4class{adpcr}}, \code{\linkS4class{ddpcr}},
-#' \code{\linkS4class{qdpcr}} or \code{\linkS4class{rtadpcr}}.
+#' This class represent the most general droplet-based digital PCR. In more specific 
+#' cases, the user is directed to other classes: \code{\linkS4class{adpcr}}, where 
+#' results can be placed over a plate, \code{\linkS4class{qdpcr}} where digital 
+#' assay is based on multiple qPCR experiments and \code{\linkS4class{rtadpcr}},
+#' where data points represent the status of partitions measured in the 
+#' real time.
 #' @keywords classes
+#' @examples
+#' 
+#' dpcr_fluo <- sim_dpcr(m = 10, n = 20, times = 5, fluo = list(0.1, 0))
+#' plot(dpcr_fluo)
+#' 
+#' dpcr <- sim_dpcr(m = 10, n = 20, times = 5)
+
 
 setClass("dpcr", contains = "matrix", representation(.Data = "matrix",
                                                      n = "integer",
                                                      exper = "factor",
                                                      replicate = "factor",
                                                      assay = "factor",
-                                                     type = "character"))
+                                                     v = "numeric",
+                                                     uv = "numeric",
+                                                     type = "character",
+                                                     threshold = "numeric"))
 
 construct_dpcr <- function(data, n, exper = "Experiment1", 
-                           replicate = NULL, assay = "Unknown", type) {
+                           replicate = NULL, assay = "Unknown", type,
+                           v = 1, uv = 0, threshold = NULL) {
   
   # data
   if (is.vector(data))
@@ -65,7 +83,7 @@ construct_dpcr <- function(data, n, exper = "Experiment1",
   
   if(length(n) != ncol(data)) {
     if(length(n) == 1) {
-      message(paste0("Assumed the number of partitions in each experiment is equal to ",
+      message(paste0("The assumed number of partitions in each run is equal to ",
                      n, "."))
       n <- rep(n, ncol(data))
     } else {
@@ -81,7 +99,7 @@ construct_dpcr <- function(data, n, exper = "Experiment1",
       stop("Each run must be assigned to an experiment.")
     }
   } 
-  if(class(exper) != "factor")
+  if(!is.factor(exper))
     exper <- as.factor(exper)
   
   
@@ -92,9 +110,21 @@ construct_dpcr <- function(data, n, exper = "Experiment1",
   if(length(replicate) != ncol(data)) {
     stop("Each run have replicate id.")
   } 
-  if(class(replicate) != "factor")
+  if(!is.factor(replicate))
     replicate <- as.factor(replicate)
   
+  run_names <- paste0(exper, ".", replicate)
+  dups <- duplicated(run_names)
+  
+  if(any(dups)) {
+    # awful workaround
+    exper <- as.character(exper)
+    exper[!dups] <- paste0(exper[!dups], "1")
+    exper[dups] <- paste0(exper[dups], "2")
+    
+    exper <- as.factor(exper)
+    run_names <- paste0(exper, ".", replicate)
+  }
   
   # assay
   if(length(assay) != ncol(data)) {
@@ -105,18 +135,43 @@ construct_dpcr <- function(data, n, exper = "Experiment1",
     }
   } 
   
-  if(class(assay) != "factor")
+  if(!is.factor(assay))
     assay <- as.factor(assay)
-  
   
   # type
   if (!(type %in% c("ct", "fluo", "nm", "np", "tnp"))) 
     stop(paste0(type, " is not recognized type value."))
   
-  colnames(data) <- paste0(exper, ".", replicate)
+  # volume
+  if(length(v) != ncol(data)) {
+    if(length(v) == 1) {
+      message(paste0("The assumed volume of partitions in each run is equal to ",
+                     v, "."))
+      v <- rep(v, ncol(data))
+    } else {
+      stop("Each run must have known volume.")
+    }
+  }
+  
+  # volume uncertainty
+  if(length(uv) != ncol(data)) {
+    if(length(uv) == 1) {
+      message(paste0("The assumed volume uncertainty in each run is equal to ",
+                     uv, "."))
+      uv <- rep(uv, ncol(data))
+    } else {
+      stop("Each run must have known volume uncertainty.")
+    }
+  }
+  
+  colnames(data) <- run_names
+  
+  if(is.null(threshold))
+    threshold <- mean(range(data))
   
   result <- new("dpcr", .Data = data, exper = exper, 
-                replicate = replicate, assay = assay, type = type)
+                replicate = replicate, assay = assay, v = v, uv = uv, 
+                threshold = threshold, type = type)
   #since n cannot be defined in new(), because of some strange error
   slot(result, "n") <- n
   result
@@ -133,19 +188,17 @@ construct_dpcr <- function(data, n, exper = "Experiment1",
 #' @name adpcr-class
 #' @aliases adpcr-class adpcr
 #' @docType class
-#' @slot breaks \code{"numeric"} vector giving the number of intervals into which 
-#' \code{.Data} should be cut. The second element in \code{breaks} vector is considered 
-#' a threshold. Partition above or equal to threshold is counted as 
-#' positive.
-#' @slot col_names \code{"character"} vector naming the columns in the array.
-#' @slot row_names \code{"character"} vector naming the rows in the array.
+#' @slot col_names \code{"character"} vector naming columns in the array.
+#' @slot row_names \code{"character"} vector naming rows in the array.
+#' @slot row_id \code{"integer"} vector providing row indices of all runs.
+#' @slot col_id \code{"integer"} vector providing column indices of all runs.
 #' @slot panel_id \code{"factor"} naming the panel to which experiment belong.
 #' @details
 #' For more in-depth explanation of digital PCR data structure, see 
 #' \code{\linkS4class{dpcr}}.
 #' @author Michal Burdukiewicz.
 #' @seealso Data management: \code{\link{adpcr2panel}}, \code{\link{bind_dpcr}},
-#' \code{\link{extract_dpcr}}.
+#' \code{\link{extract_run}}.
 #' 
 #' Plotting: \code{\link{plot_panel}}.
 #' 
@@ -155,34 +208,30 @@ construct_dpcr <- function(data, n, exper = "Experiment1",
 #' 
 #' Real-time array digital PCR: \code{\linkS4class{rtadpcr}}.
 #' 
-#' Droplet digital PCR: \code{\linkS4class{ddpcr}}.
+#' Droplet digital PCR: \code{\linkS4class{dpcr}}.
 #' @keywords classes
 #' @examples
 #' 
 #' rand_array <- sim_adpcr(400, 1600, 100, pos_sums = FALSE, n_panels = 5)
-#' one_rand_array <- extract_dpcr(rand_array, 1)
+#' one_rand_array <- extract_run(rand_array, 1)
 #' plot_panel(one_rand_array, 40, 40)
 #' 
-setClass("adpcr", contains = "dpcr", representation(breaks = "numeric",
-                                                    col_names = "character",
+setClass("adpcr", contains = "dpcr", representation(col_names = "character",
                                                     row_names = "character",
+                                                    col_id = "numeric",
+                                                    row_id = "numeric",
                                                     panel_id = "factor"))
 
 
 #constructor
 create_adpcr <- function(data, n, exper = "Experiment1", 
-                         replicate = NULL, assay = "Unknown", type, breaks, 
-                         col_names = NULL, row_names = NULL, panel_id = NULL) {
+                         replicate = NULL, assay = "Unknown", v = 1, uv = 0, type, breaks, 
+                         col_names = NULL, row_names = NULL, 
+                         col_id = NULL, row_id = NULL,
+                         panel_id = NULL, threshold = NULL) {
   result <- construct_dpcr(data = data, n = n, exper = exper, 
-                           replicate = replicate, assay = assay, type = type)
-  
-  if (is.null(breaks)) {
-    breaks <- 0L:max(data, na.rm = TRUE)
-    #if data range is too big, add smaller breaks
-    if(length(breaks) > 5) {
-      breaks <- hist(data, 5, plot = FALSE)[["breaks"]]
-    }
-  }  
+                           replicate = replicate, assay = assay, 
+                           v = v, uv = uv, type = type, threshold = threshold)
   
   if(is.null(col_names) & is.null(row_names)) {
     #access .Data slot, because its already in the matrix form
@@ -205,70 +254,35 @@ create_adpcr <- function(data, n, exper = "Experiment1",
     row_names <- as.character(1L:edge_b)
   }
   
+  # add position of chambers on the plate
+  if(is.null(col_id) & is.null(row_id)) {
+    edge_a <- length(col_names)
+    edge_b <- length(row_names)
+    
+    col_id <- sort(rep(1L:edge_a, edge_b))
+    row_id <- rep(1L:edge_b, edge_a)
+  }
+  
   if(xor(is.null(col_names), is.null(row_names))) {
     stop("Both 'col_names' and 'row_names' must be either NULL or specified.")
   }
   
   if(is.null(panel_id)) {
-#   if(type != "tnp") {
+    if(type != "tnp") {
       panel_id <- as.factor(1L:ncol(slot(result, ".Data")))
-#     } else {
-#       stop("'tnp' data require specified panel_id.")
-#     }
-  }
+    } else {
+      panel_id <- as.factor(rep(1L, ncol(slot(result, ".Data"))))
+    }
+  } 
+  
+  if(!is.factor(panel_id))
+    panel_id  <- factor(panel_id)
   
   class(result) <- "adpcr"
-  slot(result, "breaks") <- breaks
   slot(result, "col_names") <- col_names
   slot(result, "row_names") <- row_names
+  slot(result, "col_id") <- col_id
+  slot(result, "row_id") <- row_id
   slot(result, "panel_id") <- panel_id
-  result
-}
-
-#' Class \code{"ddpcr"}
-#' 
-#' A class specifically designed to contain results from droplet digital PCR
-#' experiments. Data is represented as matrix, where each column describes
-#' different experiment. Type of data in all columns is specified in
-#' slot \code{"type"}. Inherits from \code{\linkS4class{dpcr}}.
-#' 
-#' 
-#' @name ddpcr-class
-#' @aliases ddpcr-class ddpcr
-#' @docType class
-#' @slot threshold \code{numeric} value giving the threshold. Partition with the value equal or 
-#' bigger than threshold are considered positive.
-#' @details
-#' For more in-depth explanation of digital PCR data structure, see 
-#' \code{\linkS4class{dpcr}}.
-#' @author Michal Burdukiewicz.
-#' @seealso Ploting and managment: \code{\link{bind_dpcr}},
-#' \code{\link{extract_dpcr}}, \code{\link{plot_vic_fam}}.
-#' 
-#' Simulation: \code{\link{sim_ddpcr}}.
-#' 
-#' Array digital PCR: \code{\linkS4class{adpcr}}.
-#' @keywords classes
-#' @examples
-#' 
-#' ddpcr_fluo <- sim_ddpcr(m = 10, n = 20, times = 5, fluo = list(0.1, 0))
-#' plot(ddpcr_fluo)
-#' 
-#' ddpcr <- sim_ddpcr(m = 10, n = 20, times = 5)
-
-setClass("ddpcr", contains = "dpcr", representation(threshold = "numeric"))
-
-#constructor
-create_ddpcr <- function(data, n, exper = "Experiment1", 
-                         replicate = NULL, assay = "Unknown", type, threshold) {
-  
-  result <- construct_dpcr(data = data, n = n, exper = exper, 
-                           replicate = replicate, assay = assay, type = type)
-  
-  class(result) <- "ddpcr"
-  if(is.null(threshold))
-    threshold <- mean(range(data))
-  
-  slot(result, "threshold") <- threshold
   result
 }

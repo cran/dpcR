@@ -3,7 +3,7 @@
 #' The test for comparing counts from two or more digital PCR experiments.
 #' 
 #' @aliases test_counts
-#' @param input object of class \code{\linkS4class{adpcr}} or \code{\linkS4class{ddpcr}}
+#' @param input object of class \code{\linkS4class{adpcr}} or \code{\linkS4class{dpcr}}
 #' with "nm" type.
 #' @param model may have one of following values: \code{binomial}, \code{poisson},
 #' \code{prop}, \code{ratio}. See Details.
@@ -70,8 +70,7 @@
 
 test_counts <- function(input, model = "ratio", conf.level = 0.95) { 
   if(!(model %in% c("binomial", "poisson", "prop", "ratio")))
-    stop("Must must have one of following values: 'binomial', 'poisson', 'ratio' or 'prop'.")
-  
+    stop("Must must have one of following values: 'binomial', 'poisson', 'ratio' or 'prop'")
   
   if(model %in% c("prop", "ratio")) {
     test_function <- if(model == "prop") prop.test else rateratio.test
@@ -148,15 +147,39 @@ test_counts <- function(input, model = "ratio", conf.level = 0.95) {
                                                          unlist(groups))]))
     }
     
+    group_redundancy <- lapply(1L:length(groups), function(i) 
+      which(sapply(groups, function(j) 
+        all(groups[[i]] %in% j)))
+    )
+    
+    # group_redundancy <- do.call(rbind, lapply(1L:length(groups), function(single_gr) { 
+    #   groups_in <- sapply(groups, function(other_gr) 
+    #     all(groups[[single_gr]] %in% other_gr))
+    #   data.frame(gr = single_gr, other_gr = 1L:length(groups), is_in = groups_in, n_gr = sum(groups_in))
+    # }))
+    # 
+    # largest_membership <- lapply(1L:length(groups), function(single_gr) {
+    #   gr_subdf <- group_redundancy[group_redundancy[["other_gr"]] == single_gr, ]
+    #   only_in <- gr_subdf[gr_subdf[["is_in"]], ]
+    #   only_in[only_in[["n_gr"]] == max(only_in[["n_gr"]]), "gr"]
+    # })
+    # 
+    # lapply(unique(unlist(largest_membership[lengths(largest_membership) > 1])), 
+    #        function(single_doubtful) 
+    #          sum(sapply(largest_membership, function(other_gr)
+    #            single_doubtful %in% other_gr)))
     
     group_matrix <- sapply(1L:length(total), function(experiment) 
-      sapply(groups, function(single_group) experiment %in% single_group))
+      sapply(groups[lengths(group_redundancy) == 1], function(single_group) experiment %in% single_group))
+    
+    gr_order <- order(sapply(groups[lengths(group_redundancy) == 1], function(single_group) 
+      mean(group_vals[single_group, 1])))
+    
     #all experiments in one group
     if(is.null(dim(group_matrix)))
       group_matrix <- matrix(group_matrix, nrow = 1)
     #name groups using the abc convention and at the same time reorder them along to value
-    dimnames(group_matrix) <- list((1L:length(groups))[order(sapply(groups, function(single_group) 
-                                     mean(group_vals[single_group, 1])))], 
+    dimnames(group_matrix) <- list((1L:sum(lengths(group_redundancy) == 1))[gr_order], 
                                    names(positives))
     
     group_coef <- data.frame(apply(group_matrix, 2, function(i) 
@@ -167,7 +190,7 @@ test_counts <- function(input, model = "ratio", conf.level = 0.95) {
   } else {
     
     if(slot(input, "type") == "tnp")
-      stop("GLM does not work with 'tnp' type.")
+      stop("GLM does not work with 'tnp' type")
     
     #choose proper family
     if (model == "binomial") {

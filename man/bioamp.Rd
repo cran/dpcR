@@ -2,7 +2,7 @@
 % Please edit documentation in R/bioamp.R
 \name{bioamp}
 \alias{bioamp}
-\title{A function to analyze plot the raw data from a BioRad droplet digital PCR
+\title{A function to analyze plot the raw data from a Bio-Rad droplet digital PCR
 experiment}
 \usage{
 bioamp(data = data, amp_x = 1, amp_y = 2, cluster = 3, robust = TRUE,
@@ -16,7 +16,8 @@ bioamp(data = data, amp_x = 1, amp_y = 2, cluster = 3, robust = TRUE,
 
 \item{amp_y}{is the second amplitude channel (y-axis).}
 
-\item{cluster}{are the clusters of the plot. The number indicates the column of a table, which contains the cluster information.}
+\item{cluster}{are the clusters of the plot. The number indicates the column 
+of a table, which contains the cluster information.}
 
 \item{robust}{Is the method used to calculate the location (mean or median)
 and dispersion (standard deviation or median absolute deviation).}
@@ -35,13 +36,13 @@ PCR experiment are calculated.}
 }
 \description{
 \code{bioamp} is a function to plot and analyze the amplitude data of a
-BioRad droplet digital PCR experiment.
+Bio-Rad droplet digital PCR experiment.
 }
 \examples{
 
 par(mfrow = c(1,2))
-bioamp(data = pds_raw[["A01"]], main = "Well A01", pch = 19)
-bioamp(data = pds_raw[["A02"]], main = "Well A02", pch = 19)
+bioamp(data = pds_raw[["D01"]], main = "Well D01", pch = 19)
+bioamp(data = pds_raw[["D02"]], main = "Well D02", pch = 19)
 par(mfrow = c(1,1))
 
 }
@@ -49,5 +50,5 @@ par(mfrow = c(1,1))
 Stefan Roediger, Michal Burdukiewcz
 }
 \keyword{Amplitude}
-\keyword{BioRad}
+\keyword{Bio-Rad}
 

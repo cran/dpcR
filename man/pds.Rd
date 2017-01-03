@@ -61,7 +61,7 @@ www.ufz.de
 }
 \description{
 These are the results data from the \code{pds_raw} data as calculated by the
-BioRad QX100 Droplet Digital PCR System.
+Bio-Rad QX100 Droplet Digital PCR System.
 }
 \details{
 Setup: Duplex assay with constant amount of genomic DNA and six 10-fold
@@ -78,7 +78,7 @@ genomic DNA marker ileS, Taqman probes (FAM labelled). Channel 2, primers
 for plasmid DNA marker styA, Taqman probes (HEX labelled).
 }
 \examples{
-summary(extract_dpcr(read_QX100(pds), 1L:10))
+summary(extract_run(read_QX100(pds), 1L:10))
 
 }
 \author{

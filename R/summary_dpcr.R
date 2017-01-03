@@ -2,19 +2,19 @@
 #' 
 #' Expands function \code{\link[base]{summary}} allowing printing summaries
 #' objects of the class \code{\linkS4class{adpcr}} to or
-#' \code{\linkS4class{ddpcr}}.
+#' \code{\linkS4class{dpcr}}.
 #' 
 #' The function prints a summary of the dPCR reaction, including k (number of
-#' positive chambers), n (total number of chambers), estimated lambda and m
-#' (number of molecules per plate), as well as confidence intervals for the
+#' positive chambers), n (total number of chambers), estimated lambda and 
+#' concentration, as well as confidence intervals for the
 #' last two variables.
 #' 
 #' @name summary-methods
-#' @aliases summary-methods summary,adpcr-method summary,ddpcr-method summary
-#' summary.adpcr summary.ddpcr summary,dpcr-method summary.dpcr
+#' @aliases summary-methods summary,adpcr-method summary,dpcr-method summary
+#' summary.adpcr summary.dpcr summary,dpcr-method summary.dpcr
 #' @docType methods
 #' @param object object of class \code{\linkS4class{adpcr}},
-#' \code{\linkS4class{ddpcr}} or \code{\linkS4class{qdpcr}}.
+#' \code{\linkS4class{dpcr}} or \code{\linkS4class{qdpcr}}.
 #' @param print if \code{FALSE}, no output is printed.
 #' @return The data frame with estimated values of lambda, m and corresponding
 #' confidence intervals.
@@ -54,13 +54,13 @@
 #' # statistics according to Dube et al. 2008 and Bhat et al. 2009. The fluo parameter 
 #' # is used to change the smoothness of the fluorescence curve and the space between
 #' #  two consecutive measured peaks (droplets).
-#' dropletf <- sim_ddpcr(m = 7, n = 20, times = 5, fluo = list(0.1, 0))
+#' dropletf <- sim_dpcr(m = 7, n = 20, times = 5, fluo = list(0.1, 0))
 #' summary(dropletf)
 #' 
 #' # droplet dpcr - number of molecules
 #' # Similar to the previous example but with five panels but without and modifications
 #' #  to the peaks.
-#' droplet <- sim_ddpcr(m = 7, n = 20, times = 5)
+#' droplet <- sim_dpcr(m = 7, n = 20, times = 5)
 #' summary(droplet)
 #' 
 #' # Visualize the results of dropletf and dropletf
@@ -75,7 +75,7 @@ NULL
 
 setMethod("summary", signature(object = "dpcr"), function(object, print = TRUE) {
   data <- slot(object, ".Data")
-  
+
   col_dat <- ncol(data)
   type <- slot(object, "type")
   n <- slot(object, "n")
@@ -88,7 +88,7 @@ setMethod("summary", signature(object = "dpcr"), function(object, print = TRUE) 
     if (type %in% c("fluo"))
       stop(paste0("'summary' is currently not implemented for data type ", type, "."))
   
-  if(class(object) == "ddpcr")
+  if(class(object) == "dpcr")
     if (type %in% c("fluo")) 
       k <- apply(data, 2, function(x) get_k_n(x, slot(object, "threshold")))
   
@@ -102,5 +102,7 @@ setMethod("summary", signature(object = "dpcr"), function(object, print = TRUE) 
                           print = print, run_names = colnames(data), 
                           exper_names = slot(object, "exper"),
                           replicate_names = slot(object, "replicate"),
-                          assay_names = slot(object, "assay")))
+                          assay_names = slot(object, "assay"),
+                          v = slot(object, "v"),
+                          uv = slot(object, "uv")))
 })

@@ -97,12 +97,46 @@ choose_xy_region <- function(brush_id, data) {
     xmax <- carefully_round(brush_id[["xmax"]], levels(data[[1]]))
     ymin <- carefully_round(brush_id[["ymin"]], levels(data[[2]]))
     ymax <- carefully_round(brush_id[["ymax"]], levels(data[[2]]))
-    x_range <- as.numeric(xmin):as.numeric(xmax)
-    y_range <- as.numeric(ymin):as.numeric(ymax)
+    x_range <- levels(data[[1]])[char2numeric(xmin):char2numeric(xmax)]
+    y_range <- levels(data[[2]])[char2numeric(ymin):char2numeric(ymax)]
     x <- data[[1]] %in% as.factor(x_range)
     y <- data[[2]] %in% as.factor(y_range)
     x & y
   }
 }
 
+char2numeric <- function(x) 
+  if(is.na(as.numeric(x))) {
+    which(letters == tolower(x))
+  } else {
+    as.numeric(x)
+  }
 
+
+options(DT.options = list(dom = "Brtip",
+                          buttons = c("copy", "csv", "excel", "print")
+))
+
+my_DT <- function(x)
+  datatable(x, escape = FALSE, extensions = 'Buttons', 
+            filter = "top", rownames = FALSE)
+
+merge_dpcr <- function(a, b) {
+  slot_names <- slotNames(a)
+  slot_names <- slot_names[!(slot_names %in% c(".Data", "type", 
+                                               "col_names", "row_names",
+                                               "col_id", "row_id"))]
+  for(i in slot_names)
+    slot(a, i) <- slot(b, i)
+  #update names of runs if exper or run were changed
+  colnames(a) <- colnames(b)
+  a
+}
+
+unorder_df <- function(df)
+  data.frame(lapply(df, function(i)
+    if(is.ordered(i)) {
+      factor(i, ordered = FALSE)
+    } else {
+      i
+    }))

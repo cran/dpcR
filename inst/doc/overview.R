@@ -36,7 +36,7 @@ s4@type
 
 ## ----eval=TRUE-----------------------------------------------------------
 # Create single adpcr object. The following code is also true for 
-# other objects inhering from dpcr, as ddpcr or qdpcr
+# other objects inhering from dpcr, as dpcr or qdpcr
 single_run <- sim_adpcr(m = 100, n = 765, times = 100, pos_sums = FALSE, n_panels = 1)
 two_runs <- bind_dpcr(single_run, single_run)
 three_runs <- bind_dpcr(single_run, single_run, single_run)
@@ -60,26 +60,17 @@ five_runs <- sim_adpcr(m = 2, n = 10, times = 100, pos_sums = FALSE, n_panels = 
 print(five_runs)
 
 # Extract runs by the index
-only_first_run <- extract_dpcr(five_runs, 1)
-only_first_and_second_run <- extract_dpcr(five_runs, c(1, 2))
+only_first_run <- extract_run(five_runs, 1)
+only_first_and_second_run <- extract_run(five_runs, c(1, 2))
 # See if proper replicated were extracted
 slot(only_first_and_second_run, "replicate")
-no_first_run <- extract_dpcr(five_runs, -1)
+no_first_run <- extract_run(five_runs, -1)
 slot(no_first_run, "replicate")
 # Extract runs by the name
-run_Experiment1.3 <- extract_dpcr(five_runs, "Experiment1.3")
+run_Experiment1.3 <- extract_run(five_runs, "Experiment1.3")
 slot(run_Experiment1.3, "replicate")
-run_Experiment1.3and5 <- extract_dpcr(five_runs, c("Experiment1.3", "Experiment1.5"))
+run_Experiment1.3and5 <- extract_run(five_runs, c("Experiment1.3", "Experiment1.5"))
 slot(run_Experiment1.3and5, "replicate")
-
-## ----eval=TRUE-----------------------------------------------------------
-# Generate some data from 15x16 array. Let's presume, that we have results from two plates
-sample_runs <- matrix(rpois(480, lambda = 1.5), ncol = 2)
-# Check its class - it's a typical R structure
-class(sample_runs)
-# Save it to adpcr object
-adpcr_experiments <- create_dpcr(sample_runs, n = c(240L, 240L), type = "nm", adpcr = TRUE)
-class(adpcr_experiments)
 
 ## ----eval=TRUE-----------------------------------------------------------
 # Create two array dPCR experiments. Mind the difference in the n parameter.
@@ -99,7 +90,7 @@ slot(sample_adpcr, "n")
 # Quickly count positive partitions
 colSums(sample_adpcr > 0)
 # Baseline fluorescence data
-sim_ddpcr(m = 3, n = 2, times = 5, fluo = list(0.1, 0)) - 0.05
+sim_dpcr(m = 3, n = 2, times = 5, fluo = list(0.1, 0)) - 0.05
 
 ## ----eval=TRUE-----------------------------------------------------------
 # Inspect all types of data
@@ -110,7 +101,7 @@ library(chipPCR)
 qpcr2pp(data = C127EGHP[, 1L:6], type = "ct")
 
 # fluo
-sim_ddpcr(m = 3, n = 2, times = 5, fluo = list(0.1, 0)) - 0.05
+sim_dpcr(m = 3, n = 2, times = 5, fluo = list(0.1, 0)) - 0.05
 
 # nm
 sim_adpcr(m = 235, n = 765, times = 100, pos_sums = FALSE, n_panels = 3)
@@ -120,6 +111,15 @@ binarize(sim_adpcr(m = 235, n = 765, times = 100, pos_sums = FALSE, n_panels = 3
 
 # tnp
 sim_adpcr(m = 235, n = 765, times = 100, pos_sums = TRUE, n_panels = 3)
+
+## ----eval=TRUE-----------------------------------------------------------
+# Generate some data from 15x16 array. Let's presume, that we have results from two plates
+sample_runs <- matrix(rpois(480, lambda = 1.5), ncol = 2)
+# Check its class - it's a typical R structure
+class(sample_runs)
+# Save it to adpcr object
+adpcr_experiments <- create_dpcr(sample_runs, n = c(240L, 240L), type = "nm", adpcr = TRUE)
+class(adpcr_experiments)
 
 ## ----eval=TRUE-----------------------------------------------------------
 summary(six_panels)
@@ -134,28 +134,28 @@ summ[["summary"]][summ[["summary"]][["method"]] == "dube", ]
 
 ## ----eval=TRUE-----------------------------------------------------------
 
-sample_ddpcr <- sim_ddpcr(m = 3, n = 10, times = 5)
+sample_dpcr <- sim_dpcr(m = 3, n = 10, times = 5)
 # Standard show method...
-show(sample_ddpcr)
+show(sample_dpcr)
 # ... which is an equivalent of:
-sample_ddpcr
+sample_dpcr
 # If you want to see all data points:
-slot(sample_ddpcr, ".Data")
+slot(sample_dpcr, ".Data")
 
 ## ----eval=TRUE-----------------------------------------------------------
-adpcr2panel(six_panels)
+adpcr2panel(six_panels)[["Experiment3.1"]][1L:6, 1L:6]
 
 ## ----eval=TRUE-----------------------------------------------------------
 # Remember, you can plot only single panel at once 
-plot_panel(extract_dpcr(adpcr_experiments, 1), main = "Experiment 1")
+plot_panel(extract_run(adpcr_experiments, 1), main = "Experiment 1")
 
 ## ----eval=TRUE-----------------------------------------------------------
-plot_panel(binarize(extract_dpcr(adpcr_experiments, 1)), main = "Experiment 1")
+plot_panel(binarize(extract_run(adpcr_experiments, 1)), main = "Experiment 1")
 
 ## ----eval=TRUE-----------------------------------------------------------
 # Extract graphical coordinates
-panel_data <- plot_panel(extract_dpcr(adpcr_experiments, 1), plot = FALSE)
-ggplot_coords <- cbind(panel_data[["ggplot_coords"]], value = as.vector(extract_dpcr(adpcr_experiments, 1)))
+panel_data <- plot_panel(extract_run(adpcr_experiments, 1), plot = FALSE)
+ggplot_coords <- cbind(panel_data[["ggplot_coords"]], value = as.vector(extract_run(adpcr_experiments, 1)))
 
 # Plot panel using different graphics package
 library(ggplot2)

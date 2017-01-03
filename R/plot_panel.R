@@ -32,7 +32,7 @@
 #' \code{\link{graphics}} package. The second element is a data frame of coordinates 
 #' useful for users utilizing ggplot2 package.
 #' @author Michal Burdukiewicz, Stefan Roediger.
-#' @seealso \code{\link{extract_dpcr}} - extract experiments.
+#' @seealso \code{\link{extract_run}} - extract experiments.
 #' \code{\link{adpcr2panel}} - convert \code{\linkS4class{adpcr}} object to arrays.
 #' @keywords hplot
 #' @examples
@@ -44,39 +44,23 @@
 #' # Plot the dPCR experiment results with default settings
 #' plot_panel(ttest)
 #' 
-#' #do it without breaks
-#' plot_panel(ttest, use_breaks = FALSE)
-#' 
-#' # Apply a binary color code with blue as positive
-#' slot(ttest, "breaks") <- c(0, 2, 4)
-#' plot_panel(ttest, col = "blue")
-#' 
 #' # Apply a two color code for number of copies per compartment
 #' plot_panel(ttest, col = c("blue", "red"))
-#' 
-#' 
-#' 
-#' # supply customized breaks and compare
-#' par(mfcol = c(2, 1))
-#' plot_panel(ttest)
-#' slot(ttest, "breaks") <- c(0, 1, 2, (max(slot(ttest, "breaks")) + 1))
-#' plot_panel(ttest)
-#' par(mfcol = c(1, 1))
 #' 
 #' # plot few panels
 #' ttest2 <- sim_adpcr(m = 400, n = 765, times = 40, pos_sums = FALSE, 
 #'                     n_panels = 4)
 #' par(mfcol = c(2, 2))
 #' four_panels <- lapply(1:ncol(ttest2), function(i) 
-#'        plot_panel(extract_dpcr(ttest2, i), legend = FALSE, 
+#'        plot_panel(extract_run(ttest2, i), legend = FALSE, 
 #'          main = paste("Panel", LETTERS[i], sep = " ")))
 #' par(mfcol = c(1, 1))
 #' 
 #' # two different channels 
-#' plot_panel(extract_dpcr(ttest2, 1), legend = FALSE, 
+#' plot_panel(extract_run(ttest2, 1), legend = FALSE, 
 #'            half = "left")
 #' par(new = TRUE)
-#' plot_panel(extract_dpcr(ttest2, 2), col = "blue", 
+#' plot_panel(extract_run(ttest2, 2), col = "blue", 
 #'            legend = FALSE, half = "right")
 #' 
 #' # plot two panels with every well as only the half of the rectangle
@@ -84,15 +68,15 @@
 #'                     n_panels = 2)
 #' par(mfcol = c(1, 2))
 #' two_panels <- lapply(1:ncol(ttest3), function(i) 
-#'        plot_panel(extract_dpcr(ttest3, i), legend = FALSE, 
+#'        plot_panel(extract_run(ttest3, i), legend = FALSE, 
 #'          main = paste("Panel", LETTERS[i], sep = " ")))
 #' par(mfcol = c(1, 1))
 #' 
 #' @export plot_panel
-plot_panel <- function(input, use_breaks = TRUE, col = "red", legend = TRUE, 
+plot_panel <- function(input, col = "red", legend = TRUE, 
                        half = "none", plot = TRUE, ...) {  
   
-  array <- adpcr2panel(input, use_breaks = use_breaks)
+  array <- adpcr2panel(binarize(input))
   
   if(length(array) > 1) 
     warning("Only the first array will be processed.")
