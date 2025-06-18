@@ -5,17 +5,17 @@
 \alias{plot,qdpcr-method}
 \alias{plot,qdpcr,ANY-method}
 \title{Plot \code{qdpcr} objects}
+
 \arguments{
 \item{x}{is a \code{\linkS4class{qdpcr}} object.}
-
 \item{mincyc}{is the first cycle to start the plot from.}
-
 \item{maxcyc}{the last cycle for the plot.}
-
 \item{rug}{Adds a rug representation of the data to the plot.}
-
 \item{digits}{how many significant digits are to be used in plot.}
 }
+
+\value{The plot.}
+
 \description{
 An analytical plot describing relationship between the cycle number and the
 current value of Poisson mean. The plot can be used for quality control of

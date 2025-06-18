@@ -69,11 +69,11 @@ summary(droplet)
 
 # Visualize the results of dropletf and dropletf
 # The curves of dropletf are smoother.
+oldpar <- par(mfrow = c(1, 1))
 par(mfrow = c(1,2))
 plot(dropletf, main = "With fluo parameter", type = "l")
 plot(droplet, main = "Without fluo parameter", type = "l")
-
-
+par(oldpar)
 }
 \references{
 Bhat S, Herrmann J, Corbisier P, Emslie K, \emph{ Single

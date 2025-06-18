@@ -7,20 +7,16 @@
 plot_vic_fam(vic, fam, col_vic = "green", col_fam = "blue",
   circle = TRUE)
 }
+
 \arguments{
-\item{vic}{Amplitudes of the VIC channel - object of class
-\code{\linkS4class{dpcr}}.}
-
-\item{fam}{Amplitudes of the FAM channel - object of class
-\code{\linkS4class{dpcr}}.}
-
+\item{vic}{Amplitudes of the VIC channel - object of class \code{\linkS4class{dpcr}}.}
+\item{fam}{Amplitudes of the FAM channel - object of class \code{\linkS4class{dpcr}}.}
 \item{col_vic}{Color of the VIC channel.}
-
 \item{col_fam}{Color of the FAM channel.}
-
 \item{circle}{If TRUE circles are drawn, if FALSE not. If "numeric",
 specifies the radius of circles.}
 }
+\value{The plot.}
 \description{
 This function generates an amplitude plot of two fluorescence channels as
 found in droplet digital PCR.

@@ -47,8 +47,8 @@ calculated by integration of approximating spline.
 }
 \examples{
 
-
 data(many_peaks)
+oldpar <- par(mfrow = c(1, 1))
 par(mfrow = c(3,1))
 plot(many_peaks, type = "l", main = "Noisy raw data")
 abline(h = 0.01, col = "red")
@@ -74,6 +74,7 @@ positive <- sum(tmp.out$peaks[, 2] == 3)
 negative <- sum(tmp.out$peaks[, 2] == 2)
 total <- positive + negative
 
+par(oldpar)
 
 }
 \references{

@@ -17,7 +17,7 @@ The object of the input's class (\code{\linkS4class{adpcr}} or
 \code{\linkS4class{dpcr}}).
 }
 \description{
-Extract runs from a code{\linkS4class{dpcr}} object while preserving all other
+Extract runs from a \code{\linkS4class{dpcr}} object while preserving all other
 attributes.
 }
 \details{

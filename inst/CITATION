@@ -1,18 +1,12 @@
-citHeader("To cite dpcR in publications, please use:")
-
-if(!exists("meta") || is.null(meta)) meta <- packageDescription("dpcR") 
-year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date) 
-vers <- paste("R package version", meta$Version)
-
-citEntry(entry = "Manual",
-  author = "Michal Burdukiewicz and Stefan Roediger and Bart Jacobs and Piotr Sobczyk",
-  title = "dpcR: Digital PCR Analysis",
-  year = year,
-  note = vers,
-  url = "https://CRAN.R-project.org/package=dpcR",
-  textVersion = paste("Burdukiewicz M, Roediger S, Jacobs B and Sobczyk P (", 
-           year, 
-           "). dpcR: Digital PCR Analysis. ", 
-           vers, 
-           ", https://CRAN.R-project.org/package=dpcR",
-           ".", sep=""))
+citation <- function(package = "yourPackage") {
+  bibentry(
+    bibtype = "Manual",
+    title = "dpcR: Digital PCR Analysis",
+    author = c(person("Michal", "Burdukiewicz"), person("Stefan", "Roediger"), person("Bart", "Jacobs"), person("Piotr", "Sobczyk")),
+    journal = "",
+    url = "https://CRAN.R-project.org/package=dpcR",
+    year = 2013,
+    volume = "",
+    pages = ""
+  )
+}

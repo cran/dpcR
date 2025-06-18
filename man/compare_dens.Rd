@@ -6,16 +6,18 @@
 \usage{
 compare_dens(input, moments = TRUE, ...)
 }
+
 \arguments{
 \item{input}{object of class \code{\linkS4class{dpcr}} containing only one run.}
-
 \item{moments}{logical, if \code{TRUE}, both theoretical and empirical
 moments are printed on the plot.}
-
 \item{\dots}{other arguments passed to the \code{plot} function.}
 }
+
+\value{A density plot.}
+
 \description{
-Plot empirical and theoretical density of the result of the digital PCR
+Plots empirical and theoretical density of the digital PCR
 experiment.
 }
 \examples{

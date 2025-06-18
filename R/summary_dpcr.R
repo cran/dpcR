@@ -84,11 +84,11 @@ setMethod("summary", signature(object = "dpcr"), function(object, print = TRUE) 
     stop(paste0("'summary' is currently not implemented for data type ", type, "."))
   
   
-  if(class(object) == "adpcr")
+  if(as.character(class(object)) == "adpcr")
     if (type %in% c("fluo"))
       stop(paste0("'summary' is currently not implemented for data type ", type, "."))
   
-  if(class(object) == "dpcr")
+  if(as.character(class(object)) == "dpcr")
     if (type %in% c("fluo")) 
       k <- apply(data, 2, function(x) get_k_n(x, slot(object, "threshold")))
   

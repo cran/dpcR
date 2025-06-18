@@ -49,9 +49,6 @@ Clinical Chemistry, 2013. 59(6): p.892-902.
 Vogelstein B, Kinzler KW, \emph{Digital PCR}. PNAS, 1999. 96(16): p.
 9236-9241. %%MORE REFERENCES
 }
-\seealso{
-\link[qpcR]{qpcR.news}, \url{http://michbur.github.io/pcRuniveRsum/}.
-}
 \author{
 Michal Burdukiewicz, Stefan Roediger.
 

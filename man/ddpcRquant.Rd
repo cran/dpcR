@@ -27,7 +27,7 @@ Cluster raw data from QX100 and QX200 systems.
 }
 \note{
 This function is a modification of code was implemented using the code found on
-\url{http://www.ddpcrquant.ugent.be/}.
+\url{https://ddpcrquant.ugent.be/}.
 }
 \references{
 Trypsteen W, Vynck M, De Neve J, Bonczkowski P, Kiselinova M, 

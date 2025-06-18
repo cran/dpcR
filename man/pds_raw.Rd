@@ -6,10 +6,10 @@
 \title{Plasmid dilution series raw data}
 \format{A list of 3 data frames.
 \describe{ 
-  \item{Well }{| ExptType }{| Experiment }{| Sample + Dilution step }{| TypeAssay }{| Assay}
-  \item{D01 }{| Absolute Quantification }{| ABS }{| gDNA + P 10^4 }{| Ch1Unknown }{| ileS}
-  \item{D02 }{| Absolute Quantification }{| ABS }{| gDNA + P 10^2 }{| Ch1Unknown }{| ileS}
-  \item{C04 }{| Absolute Quantification }{| ABS }{| gDNA }{| Ch1Unknown }{| ileS}
+  \item{Well}{| ExptType | Experiment | Sample + Dilution step | TypeAssay | Assay |}
+  \item{D01}{| Absolute Quantification | ABS | gDNA + P 10^4 | Ch1Unknown | ileS |}
+  \item{D02}{| Absolute Quantification | ABS | gDNA + P 10^2 | Ch1Unknown | ileS |}
+  \item{C04}{| Absolute Quantification | ABS | gDNA | Ch1Unknown | ileS |}
 }}
 \source{
 Michael Jahn Flow cytometry group / Environmental microbiology
@@ -22,12 +22,7 @@ Subset of raw data from the \code{pds_raw} data set as measured by the
 Bio-Rad QX100 Droplet Digital PCR System.
 }
 \details{
-The results can be  calculated as by the Bio-Rad QX100 Droplet Digital PCR
-System are to be found in \code{pds}.
-
-
-The results can be calculated as by the Bio-Rad QX100 Droplet Digital PCR
-System are to be found in \code{pds}.
+The results can be found in \code{pds}.
 
 Setup: Duplex assay with a constant amount of genomic DNA and six 10-fold
 dilutions of plasmid DNA with 4 replicates, ranging theoretically from ~
@@ -60,7 +55,6 @@ QX100_rawdata.zip.
 }
 \examples{
 
-#str(pds_raw)
 bioamp(data = pds_raw[["D02"]], main = "Well D02", pch = 19)
 
 }

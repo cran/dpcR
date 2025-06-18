@@ -9,6 +9,7 @@ num2int(x)
 \arguments{
 \item{x}{an \code{numeric} vector}
 }
+\value{The positive integer of \code{x}.}
 \description{
 Converts \code{numeric} values to positive \code{integer}s with a warning.
 }

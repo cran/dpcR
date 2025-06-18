@@ -37,7 +37,7 @@ number of plates (minimum 1).
 }
 \description{
 Performs a test of Complete Spatial Randomness for each
-plate. This function is a wrapper around \code{\link[spatstat]{quadrat.test}}
+plate. This function is a wrapper around \code{quadrat.test}
 function working directly on the objects of \code{\linkS4class{adpcr}}.
 }
 \details{
@@ -48,7 +48,7 @@ Arrays with non-random patterns should be checked for integrity.
 }
 \note{
 A similar result can be achived by using \code{\link{adpcr2ppp}} and
-\code{\link[spatstat]{quadrat.test}}. See Examples.
+\code{quadrat.test}. See Examples.
 }
 \examples{
 
@@ -60,17 +60,13 @@ test_panel(many_panels)
 test_panel(extract_run(many_panels, 3))
 
 #do test_panel manually
-require(spatstat)
+library(spatstat.explore)
 ppp_data <- adpcr2ppp(many_panels)
 lapply(ppp_data, function(single_panel) quadrat.test(single_panel))
-
 
 }
 \references{
 http://www.spatstat.org/
-}
-\seealso{
-\code{\link[spatstat]{quadrat.test}}.
 }
 \author{
 Adrian Baddeley, Rolf Turner, Michal Burdukiewcz, Stefan Roediger.

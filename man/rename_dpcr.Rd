@@ -18,6 +18,9 @@ replicates' names are not changed.}
 \item{assay}{a vector of new assays' names. If \code{NULL},
 assays' names are not changed.}
 }
+
+\value{The renamed \code{adpcr} or \code{dpcr} object.}
+
 \description{
 Renames objects of class \code{\linkS4class{adpcr}} or \code{\linkS4class{dpcr}}.
 }

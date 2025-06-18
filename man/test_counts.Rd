@@ -26,7 +26,7 @@ The test for comparing counts from two or more digital PCR experiments.
 Model) and multiple pair-wise tests. The GLM fits counts data from different 
 digital PCR experiments using quasibinomial or quasipoisson \code{\link[stats]{family}}. 
 Comparisons between single experiments utilize Tukey's contrast and multiple t-tests 
-(as provided by function \code{\link{glht}}).
+(as provided by function \code{glht}).
 
 In case of pair-wise tests, (\code{\link[rateratio.test]{rateratio.test}} or 
 \code{\link[stats]{prop.test}}) are used to compare all pairs of experiments. The 
@@ -38,8 +38,6 @@ Mean number of template molecules per partition and its confidence intervals wil
 vary depending on input.
 }
 \examples{
-#be warned, the examples of test_counts are time-consuming
-\dontrun{
 adpcr1 <- sim_adpcr(m = 10, n = 765, times = 1000, pos_sums = FALSE, n_panels = 3)
 adpcr2 <- sim_adpcr(m = 60, n = 550, times = 1000, pos_sums = FALSE, n_panels = 3)
 adpcr2 <- rename_dpcr(adpcr2, exper = "Experiment2")
@@ -65,22 +63,9 @@ one_group <- test_counts(bind_dpcr(adpcr1, adpcr3))
 summary(one_group)
 plot(one_group)
 }
-}
 \references{
 Bretz F, Hothorn T, Westfall P, \emph{Multiple comparisons using R}. 
 Boca Raton, Florida, USA: Chapman & Hall/CRC Press (2010).
-}
-\seealso{
-Functions used by \code{test_counts}: 
-\itemize{
-\item \code{\link[stats]{glm}},
-\item \code{\link[multcomp]{glht}},
-\item \code{\link[multcomp]{cld}},
-\item \code{\link[stats]{prop.test}},
-\item \code{\link[rateratio.test]{rateratio.test}}
-}
-
-GUI presenting capabilities of the test: \code{\link{test_counts_gui}}.
 }
 \author{
 Michal Burdukiewicz, Stefan Roediger, Piotr Sobczyk.

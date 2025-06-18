@@ -1,17 +1,17 @@
 Package: dpcR
 Type: Package
 Title: Digital PCR Analysis
-Version: 0.5
+Version: 0.6
 LazyData: true
-Date: 2019-02-01
+Date: 2025-06-12
 Authors@R: c(
     person("Michal", "Burdukiewicz", email = "michalburdukiewicz@gmail.com", 
-           role = c("cre", "aut"), comment = c(ORCID = "0000-0001-8926-582X")),
+           role = c("aut"), comment = c(ORCID = "0000-0001-8926-582X")),
     person("Stefan", "Roediger", email = "stefan.roedigier@b-tu.de", role = "aut",
            comment = c(ORCID = "0000-0002-1441-6512")),
     person("Bart", "Jacobs", email = "BartKM.Jacobs@ugent.be", role = "aut"),
     person("Piotr", "Sobczyk", email = "pj.sobczyk@gmail.com", role = "ctb"),
-    person("Andrej-Nikolai", "Spiess", email = "draspiess@gmail.com", role = "ctb"))
+    person("Andrej-Nikolai", "Spiess", email = "draspiess@gmail.com", role = c("cre", "ctb")))
 Description: Analysis, visualisation and simulation of digital polymerase chain
     reaction (dPCR) (Burdukiewicz et al. (2016) <doi:10.1016/j.bdq.2016.06.004>). 
     Supports data formats of commercial systems (Bio-Rad QX100 and
@@ -21,16 +21,16 @@ URL: https://github.com/michbur/dpcR
 BugReports: https://github.com/michbur/dpcR/issues
 Depends: R (>= 3.0.0), methods
 Imports: binom, chipPCR, e1071, evd, dgof, multcomp, qpcR, pracma,
-        rateratio.test, readxl, signal, shiny, spatstat
+        rateratio.test, readxl, signal, shiny, spatstat.explore,
+        spatstat.geom
 Suggests: digest, DT, ggplot2, knitr, markdown, rhandsontable,
         rmarkdown, shinythemes, xtable
 VignetteBuilder: knitr
-Packaged: 2019-02-03 21:07:59 UTC; michal
+Packaged: 2025-06-17 04:13:43 UTC; User
 NeedsCompilation: no
 Repository: CRAN
 Encoding: UTF-8
 RoxygenNote: 6.1.1
-Maintainer: Michal Burdukiewicz <michalburdukiewicz@gmail.com>
 Collate: 'AUCtest.R' 'BioradCNV.R' 'White.R' 'adpcr2panel.R'
         'adpcr2ppp.R' 'binarize.R' 'classes.R' 'bind_dpcr.R' 'bioamp.R'
         'calc_breaks.R' 'calc_coordinates.R' 'calc_lambda.R'
@@ -48,10 +48,11 @@ Collate: 'AUCtest.R' 'BioradCNV.R' 'White.R' 'adpcr2panel.R'
         'six_panels.R' 'summary_dpcr.R' 'test_counts.R'
         'test_counts_gui.R' 'test_panel.R' 'test_peaks.R'
         'test_pooled.R' 'valid_amp.R' 'y_val_conf.R'
-Author: Michal Burdukiewicz [cre, aut]
-    (<https://orcid.org/0000-0001-8926-582X>),
-  Stefan Roediger [aut] (<https://orcid.org/0000-0002-1441-6512>),
+Date/Publication: 2025-06-18 08:40:30 UTC
+Author: Michal Burdukiewicz [aut] (ORCID:
+    <https://orcid.org/0000-0001-8926-582X>),
+  Stefan Roediger [aut] (ORCID: <https://orcid.org/0000-0002-1441-6512>),
   Bart Jacobs [aut],
   Piotr Sobczyk [ctb],
-  Andrej-Nikolai Spiess [ctb]
-Date/Publication: 2019-02-03 23:13:49 UTC
+  Andrej-Nikolai Spiess [cre, ctb]
+Maintainer: Andrej-Nikolai Spiess <draspiess@gmail.com>

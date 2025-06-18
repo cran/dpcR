@@ -56,7 +56,7 @@
 #' 
 #' @export plot_vic_fam
 plot_vic_fam <- function(vic, fam, col_vic = "green", col_fam = "blue", circle = TRUE) {
-  if (class(vic) == "dpcr" && class(fam) == "dpcr") { 
+  if (as.character(class(vic)) == "dpcr" && as.character(class(fam)) == "dpcr") { 
     if (ncol(vic) > 1 && ncol(fam) > 1)
       stop("Both 'vic' and 'fam' must contain only one panel.", call. = TRUE, domain = NA)    
     if (nrow(vic) == 1 && nrow(fam) == 1)

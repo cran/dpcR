@@ -70,11 +70,12 @@ digital PCR, it's also viable for simulating droplet-based methods.
 #simulate fluorescence data
 tmp_VIC <- sim_dpcr(m = 7, n = 20, times = 5, fluo = list(0.1, 0))
 tmp_FAM <- sim_dpcr(m = 15, n = 20, times = 5, fluo = list(0.1, 0))
+oldpar <- par(mfrow = c(1, 1))
 par(mfrow = c(2,1))
 plot(tmp_VIC, col = "green", type = "l")
 plot(tmp_FAM, col = "blue", type = "l")
+par(oldpar)
 summary(tmp_FAM)
-
 summary(sim_dpcr(m = 7, n = 20, times = 5, n_exp = 5))
 
 }

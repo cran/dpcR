@@ -36,6 +36,7 @@ one_rand_array <- extract_run(rand_array, 1)
 plot_panel(one_rand_array, 40, 40)
 
 }
+
 \seealso{
 Data management: \code{\link{adpcr2panel}}, \code{\link{bind_dpcr}},
 \code{\link{extract_run}}.

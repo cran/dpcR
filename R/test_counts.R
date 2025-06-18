@@ -200,11 +200,11 @@ test_counts <- function(input, model = "ratio", conf.level = 0.95) {
       #family for model
       fam <- quasibinomial(link = "log")
       #function transforming coefficients of model to lambdas
+      fl <- function(p) -log(1 - p)
       trans_fun <- function(x) fl(exp(x))
     } 
     
     if (model == "poisson") {
-      
       #family for model
       fam <- quasipoisson(link = "log")
       #function transforming coefficients of model to lambdas
@@ -218,12 +218,14 @@ test_counts <- function(input, model = "ratio", conf.level = 0.95) {
       data.frame(experiment = rep(colnames(input)[i], length(vals)), values = vals)
     }))
     
+    # version 0.6: convert 'experiment' to factor
+    m_dpcr[, 1] <- as.factor(m_dpcr[, 1])
     
     #fit model
     fit <- glm(values ~ experiment + 0, data = m_dpcr, family = fam)
     
     #do multiple comparision
-    multi_comp <- glht(fit, linfct = mcp(experiment = "Tukey"))
+    multi_comp <- glht(fit, linfct =  mcp(experiment = "Tukey"))
     
     coefs <- summary(fit)[["coefficients"]][, 1:2]
     lambdas <- trans_fun(matrix(c(coefs[, 1], 

@@ -64,11 +64,12 @@ plot_panel(ttest, col = c("blue", "red"))
 # plot few panels
 ttest2 <- sim_adpcr(m = 400, n = 765, times = 40, pos_sums = FALSE, 
                     n_panels = 4)
+oldpar <- par(mfcol = c(1, 1))
 par(mfcol = c(2, 2))
 four_panels <- lapply(1:ncol(ttest2), function(i) 
        plot_panel(extract_run(ttest2, i), legend = FALSE, 
          main = paste("Panel", LETTERS[i], sep = " ")))
-par(mfcol = c(1, 1))
+par(oldpar)
 
 # two different channels 
 plot_panel(extract_run(ttest2, 1), legend = FALSE, 
@@ -80,11 +81,12 @@ plot_panel(extract_run(ttest2, 2), col = "blue",
 # plot two panels with every well as only the half of the rectangle
 ttest3 <- sim_adpcr(m = 400, n = 765, times = 40, pos_sums = FALSE, 
                     n_panels = 2)
+oldpar <- par(mfcol = c(1, 1))
 par(mfcol = c(1, 2))
 two_panels <- lapply(1:ncol(ttest3), function(i) 
        plot_panel(extract_run(ttest3, i), legend = FALSE, 
          main = paste("Panel", LETTERS[i], sep = " ")))
-par(mfcol = c(1, 1))
+par(oldpar)
 
 }
 \seealso{

@@ -1,6 +1,6 @@
 fit_adpcr <- function(pcr_data, cyc = 1, fluo = NULL, model = l5, norm = FALSE, 
                       iter_tr = 50){
-  if (class(pcr_data) == "list") {
+  if (as.character(class(pcr_data)) == "list") {
     lapply(pcr_data, function (i) fit_single_adpcr(i, cyc, fluo, model, norm, iter_tr))
   } else {
     fit_single_adpcr(pcr_data, cyc, fluo, model, norm, iter_tr)

@@ -21,8 +21,7 @@ The object of the input's class (\code{\linkS4class{adpcr}} or
 \code{\linkS4class{dpcr}}).
 }
 \description{
-Extract all runs belonging to specific assay or experiment(s) from a 
-code{\linkS4class{dpcr}} object while preserving all other
+Extract all runs belonging to specific assay or experiment(s) from a \code{\linkS4class{dpcr}} object while preserving all other
 attributes.
 }
 \note{

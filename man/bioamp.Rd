@@ -2,8 +2,7 @@
 % Please edit documentation in R/bioamp.R
 \name{bioamp}
 \alias{bioamp}
-\title{A function to analyze plot the raw data from a Bio-Rad droplet digital PCR
-experiment}
+\title{Analyze and plot a Bio-Rad droplet digital PCR experiment}
 \usage{
 bioamp(data = data, amp_x = 1, amp_y = 2, cluster = 3,
   robust = TRUE, plot = TRUE, stat = TRUE,
@@ -11,40 +10,30 @@ bioamp(data = data, amp_x = 1, amp_y = 2, cluster = 3,
 }
 \arguments{
 \item{data}{object of class \code{what} containing the amplitude data.}
-
 \item{amp_x}{is the first amplitude channel (x-axis).}
-
 \item{amp_y}{is the second amplitude channel (y-axis).}
-
 \item{cluster}{are the clusters of the plot. The number indicates the column 
 of a table, which contains the cluster information.}
-
 \item{robust}{Is the method used to calculate the location (mean or median)
 and dispersion (standard deviation or median absolute deviation).}
-
 \item{plot}{logical, if \code{TRUE}, the plot is printed.}
-
 \item{stat}{logical, if \code{TRUE}, the statistics of the droplet digital
 PCR experiment are calculated.}
-
 \item{xlab}{x-label of the plot.}
-
 \item{ylab}{y-label of the plot.}
-
 \item{\dots}{other arguments passed to the \code{plot} function (see
 \code{plot.default} for details).}
 }
+\value{A matrix with the summary results together with the raw data plot.}
 \description{
-\code{bioamp} is a function to plot and analyze the amplitude data of a
-Bio-Rad droplet digital PCR experiment.
+\code{bioamp} is a function to plot and analyze the amplitude data of a Bio-Rad droplet digital PCR experiment.
 }
 \examples{
-
+oldpar <- par(mfrow = c(1, 1))
 par(mfrow = c(1,2))
 bioamp(data = pds_raw[["D01"]], main = "Well D01", pch = 19)
 bioamp(data = pds_raw[["D02"]], main = "Well D02", pch = 19)
-par(mfrow = c(1,1))
-
+par(oldpar)
 }
 \author{
 Stefan Roediger, Michal Burdukiewcz

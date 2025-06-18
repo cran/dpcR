@@ -6,6 +6,7 @@
 \usage{
 test_counts_gui()
 }
+\value{A Shiny GUI for the different analyses described in this package.}
 \description{
 Launches graphical user interface allowing multiple comparisons of simulated digital 
 PCR reactions.

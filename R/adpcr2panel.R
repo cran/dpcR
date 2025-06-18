@@ -27,7 +27,7 @@
 
 
 adpcr2panel <- function(input, breaks = FALSE) {
-  if (class(input) == "adpcr") {
+  if (as.character(class(input)) == "adpcr") {
     if (!(slot(input, "type") %in% c("nm", "np", "tnp", "fluo", "ct")))
       stop("Input must contain data of type 'nm', 'np', 'tnp', 'fluo' or 'ct'.") 
   } else {

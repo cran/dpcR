@@ -69,31 +69,25 @@ setMethod("show", "count_test",
 #' @details In case of the aggregated plot, mean confidence intervals for groups are 
 #' presented as dashed lines.
 #' @export
-setMethod("plot", signature(x = "count_test"), function(x, aggregate = FALSE, 
-                                                        nice = TRUE) {
+setMethod("plot", signature(x = "count_test"), function(x, aggregate = FALSE, nice = TRUE) {
   group_coef <- slot(x, "group_coef")
   if (aggregate) {
     summ <- aggregate(. ~ group, group_coef, mean)
+    print(summ)
     #possible groups
-    pos_groups <- group_coef[["group"]]
+    pos_groups <- as.factor(group_coef[["group"]])
     
-    plot(c(0.55, nrow(summ) + 0.45), range(summ[, c("lambda.low", "lambda.up")]), 
-         xlab = "Group", ylab = expression(lambda), xaxt = "n", cex = 0)
+    plot(c(0.55, nrow(summ) + 0.45), range(summ[, c("lambda.low", "lambda.up")]), xlab = "Group", ylab = expression(lambda), xaxt = "n", cex = 0)
     
     #colors and axis setup
-    colors <- if(nice) {
-      rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-           col = adjustcolor("grey", alpha.f = 0.30))
-      axis(1, tck = 1, col.ticks = "white", labels = FALSE, at = 1L:nrow(summ))
-      axis(2, tck = 1, col.ticks = "white", labels = FALSE)
-      box()
-      rainbow(nlevels(pos_groups))
-    } else {
-      rep("black", nlevels(pos_groups))
-    }
+    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col = adjustcolor("grey", alpha.f = 0.30))
+    axis(1, tck = 1, col.ticks = "white", labels = FALSE, at = 1L:nrow(summ))
+    axis(2, tck = 1, col.ticks = "white", labels = FALSE)
+    box()
     
-    sapply(1L:nrow(summ), function(i)
-      axis(side = 1, labels = summ[i, "group"], at = i, col.axis = colors[i]))
+    colors <- if(nice) rainbow(nlevels(pos_groups)) else rep("black", nlevels(pos_groups))
+    
+    sapply(1L:nrow(summ), function(i) axis(side = 1, labels = summ[i, "group"], at = i, col.axis = colors[i]))
     
     sapply(1L:length(levels(pos_groups)), function(i) {
       points(i + seq(-2, 2, length.out = sum(levels(pos_groups)[i] == pos_groups))/10,
@@ -108,35 +102,25 @@ setMethod("plot", signature(x = "count_test"), function(x, aggregate = FALSE,
   } else {
     #positions of experiments
     exp_pos <- 1L:nrow(group_coef)
-                       
-    plot(exp_pos, group_coef[["lambda"]], 
-         ylim = range(group_coef[, c("lambda.low", "lambda.up")]), xaxt = "n",
+    
+    plot(exp_pos, group_coef[["lambda"]], ylim = range(group_coef[, c("lambda.low", "lambda.up")]), xaxt = "n",
          xlab = "Experiment", ylab = expression(lambda), cex = 0)
     
+    rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], col = adjustcolor("grey", alpha.f = 0.30))
+    axis(1, tck = 1, col.ticks = "white", labels = FALSE, at = exp_pos)
+    axis(2, tck = 1, col.ticks = "white", labels = FALSE)
+    box()
+    
     #colors and axis setup
-    colors <- if(nice) {
-      rect(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[4], 
-           col = adjustcolor("grey", alpha.f = 0.30))
-      axis(1, tck = 1, col.ticks = "white", labels = FALSE, at = exp_pos)
-      axis(2, tck = 1, col.ticks = "white", labels = FALSE)
-      box()
-      rainbow(nlevels(group_coef[["group"]]))
-    } else {
-      rep("black", nlevels(group_coef[["group"]]))
-    } 
+    colors <- if(nice) rainbow(nlevels(as.factor(group_coef[["group"]]))) else rep("black", nlevels(as.factor(group_coef[["group"]])))
     
-    
-    sapply(1L:nlevels(group_coef[["group"]]), function(i) {
-      lab_pos <- exp_pos[group_coef[["group"]] == levels(group_coef[["group"]])[i]]
-      points(lab_pos, group_coef[lab_pos, "lambda"], col = colors[i],
-             pch = ifelse(nice, 16, 1))
+    sapply(1L:nlevels(as.factor(group_coef[["group"]])), function(i) {
+      lab_pos <- exp_pos[group_coef[["group"]] == levels(as.factor(group_coef[["group"]]))[i]]
+      points(lab_pos, group_coef[lab_pos, "lambda"], col = colors[i], pch = ifelse(nice, 16, 1))
       #errorbars
-      sapply(lab_pos, function(j)
-        lines(c(j, j), group_coef[j, c("lambda.low", "lambda.up")],
-              col = colors[i], lwd = 1.5))
+      sapply(lab_pos, function(j) lines(c(j, j), group_coef[j, c("lambda.low", "lambda.up")], col = colors[i], lwd = 1.5))
       #top axis with group names
-      axis(side = 3, labels = rep(levels(group_coef[["group"]])[i], length(lab_pos)), 
-           at = lab_pos, col.axis = colors[i])
+      axis(side = 3, labels = rep(levels(group_coef[["group"]])[i], length(lab_pos)), at = lab_pos, col.axis = colors[i])
       })
     
     axis(1, at = exp_pos, labels = rownames(group_coef))

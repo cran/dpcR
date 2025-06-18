@@ -6,6 +6,7 @@
 \usage{
 dpcr_density_gui()
 }
+\value{A Shiny GUI for density calculation.}
 \description{
 Launches graphical user interface that allows calculating density of
 positive partitions distribution.

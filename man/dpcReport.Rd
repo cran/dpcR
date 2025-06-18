@@ -6,6 +6,7 @@
 \usage{
 dpcReport()
 }
+\value{A Shiny GUI with a report.}
 \description{
 Launches graphical user interface that generates reports from digital PCR 
 data.

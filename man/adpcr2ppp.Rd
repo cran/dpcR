@@ -11,21 +11,22 @@ adpcr2ppp(input, marks = TRUE, plot = FALSE)
 from one or more panels.}
 
 \item{marks}{If \code{TRUE}, marks values for non-empty partitions. See 
-\code{\link[spatstat]{ppp}} for more in-depth description.}
+\code{ppp} for more in-depth description.}
 
 \item{plot}{If \code{TRUE}, array is plotted.}
 }
+
 \value{
 A list containing objects with class
-\code{\link[spatstat]{ppp.object}} with the length equal to the number of
+\code{ppp.object} with the length equal to the number of
 arrays (minimum 1).
 }
 \description{
 Converts \code{\linkS4class{adpcr}} object to the list of
-\code{\link[spatstat]{ppp.object}}s.
+\code{ppp.object}s.
 }
 \details{
-Each array is independently converted by \code{\link[spatstat]{ppp}}
+Each array is independently converted by \code{ppp}
 function. \code{marks} attached to each point represent values contained by
 the \code{\linkS4class{adpcr}} object.
 }
@@ -50,9 +51,6 @@ class(third_plate2)
 #list
 class(third_plate2[[1]])
 
-}
-\seealso{
-\code{\link[spatstat]{ppp.object}}, \code{\link[spatstat]{ppp}}.
 }
 \author{
 Michal Burdukiewcz, Stefan Roediger.

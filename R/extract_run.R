@@ -42,7 +42,7 @@
 #' 
 #' @export extract_run
 extract_run <- function(input, id) {
-  if (!(class(input) %in% c("adpcr", "dpcr")))
+  if (!(as.character(class(input)) %in% c("adpcr", "dpcr")))
     stop("Input must have 'adpcr' or 'dpcr' class")
   
   #when id is a column name
@@ -69,7 +69,7 @@ extract_run <- function(input, id) {
   
   
   #in case of tnp type extract also columns names
-  if (class(input) == "adpcr") {
+  if (as.character(class(input)) == "adpcr") {
     slot(result, "panel_id") <- droplevels(slot(input, "panel_id")[id])
     if (slot(input, "type") == "tnp") {
       slot(result, "col_names") <- slot(input, "col_names")[id]
